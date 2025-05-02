@@ -46,13 +46,23 @@ module "iam_role" {
   service_role_name   = var.service_role_name
 }
 
+module "log_groups" {
+  source = "../../modules/log_group"
+
+  for_each = var.microservices
+
+  name              = "/ecs/${each.key}"
+  retention_in_days = var.log_retention_in_days
+  tags = each.value.tags
+}
+
 module "microservices" {
   source = "../../modules/ecs_microservice"
 
   for_each = var.microservices
 
   service_name       = each.key
-  container_image    = "${module.ecr.repository_uris[each.value.repository_name]}:${each.value.image_version}"  # Corrected dynamic assignment for image version
+  container_image    = "${module.ecr.repository_uris[each.value.repository_name]}/${each.key}:${each.value.image_version}"  # Corrected dynamic assignment for image version
   container_port     = each.value.container_port
   cpu                = each.value.cpu
   memory             = each.value.memory
@@ -62,4 +72,6 @@ module "microservices" {
   security_group_ids  = [for sg_name in each.value.security_group_names : module.security_group.security_group_ids_map[sg_name]] 
   execution_role_arn = module.iam_role.ecs_service_role_arn
   ecs_cluster_id     = module.ecs_cluster.ecs_cluster_id
+  log_group_name     = module.log_groups[each.key].log_group_name
+  aws_region = var.aws_region
 }

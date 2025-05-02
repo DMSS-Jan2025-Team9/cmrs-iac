@@ -1,3 +1,4 @@
+aws_region = "ap-southeast-1"
 vpc_parameters = {
   vpc-cmrs-app-01 = {
     cidr_block           = "10.0.0.0/16"
@@ -143,6 +144,7 @@ EOT
 cluster_name = "cmrs-ecs-cluster"
 execution_role_name = "ecs-task-execution-role"
 service_role_name   = "ecs-service-role"
+log_retention_in_days = 14
 
 microservices = {
   user-management = {
@@ -154,6 +156,11 @@ microservices = {
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
     security_group_names = ["sgrp-cmrs-app-01"]
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Service"     = "user-management"
+    }
   }
 
   course-management = {
@@ -165,6 +172,11 @@ microservices = {
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
     security_group_names = ["sgrp-cmrs-app-01"]
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Service"     = "course-management"
+    }
   }
 
   course-registration = {
@@ -176,6 +188,11 @@ microservices = {
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
     security_group_names = ["sgrp-cmrs-app-01"]
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Service"     = "course-registration"
+    }
   }
 
   notification = {
@@ -187,6 +204,11 @@ microservices = {
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
     security_group_names = ["sgrp-cmrs-app-01"]
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Service"     = "notification"
+    }
   }
 
   course-recommendation = {
@@ -198,5 +220,10 @@ microservices = {
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
     security_group_names = ["sgrp-cmrs-app-01"]
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Service"     = "course-recommendation"
+    }
   }
 }

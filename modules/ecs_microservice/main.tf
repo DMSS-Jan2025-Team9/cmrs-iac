@@ -14,8 +14,17 @@ resource "aws_ecs_task_definition" "this" {
         {
           containerPort = var.container_port
           hostPort      = var.container_port
+          protocol      = "tcp"
         }
       ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = var.log_group_name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = var.service_name
+        }
+      }
     }
   ])
 }

@@ -1,3 +1,9 @@
+# AWS Region (can also be used for setting up the log stream)
+variable "aws_region" {
+  description = "The AWS region to deploy the ECS service"
+  type        = string
+}
+
 variable "vpc_parameters" {
   description = "VPC parameters"
   type = map(object({
@@ -105,6 +111,11 @@ variable "service_role_name" {
   type        = string
 }
 
+variable "log_retention_in_days" {
+  description = "The retention in days for log groups"
+  type        = number
+}
+
 variable "microservices" {
   description = "Map of ECS microservices"
   type = map(object({
@@ -116,5 +127,6 @@ variable "microservices" {
     image_version        : string            # Version of the image for each microservice
     subnets_names        : list(string)      # List of subnet names for the microservice
     security_group_names : list(string)      # List of security group names for the microservice
+    tags                 = optional(map(string), {})
   }))
 }
