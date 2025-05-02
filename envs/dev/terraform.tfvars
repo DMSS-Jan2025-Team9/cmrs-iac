@@ -313,7 +313,7 @@ microservices = {
       max_capacity      = 4
       cpu_target_value  = 75
     }
-  }
+  },
 
   course-management = {
     container_port       = 8081
@@ -334,7 +334,7 @@ microservices = {
       max_capacity      = 3
       cpu_target_value  = 75
     }
-  }
+  },
 
   course-registration = {
     container_port       = 8083
@@ -355,7 +355,7 @@ microservices = {
       max_capacity      = 4
       cpu_target_value  = 75
     }
-  }
+  },
 
   notification = {
     container_port       = 8084
@@ -376,7 +376,7 @@ microservices = {
       max_capacity      = 2
       cpu_target_value  = 75
     }
-  }
+  },
 
   course-recommendation = {
     container_port       = 8082

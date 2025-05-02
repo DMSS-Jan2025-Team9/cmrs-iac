@@ -1,6 +1,6 @@
-variable "ecs_cluster_id" {
+variable "ecs_cluster_name" {
   type        = string
-  description = "The ID of the ECS cluster"
+  description = "The name of the ECS cluster"
 }
 
 variable "service_name" {

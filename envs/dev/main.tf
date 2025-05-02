@@ -81,7 +81,7 @@ module "ecs_autoscaling" {
 
   for_each = var.microservices
 
-  ecs_cluster_id   = module.ecs_cluster.ecs_cluster_id
+  ecs_cluster_name   = module.ecs_cluster.ecs_cluster_name
   service_name     = each.key
 
   min_capacity     = each.value.autoscaling.min_capacity
