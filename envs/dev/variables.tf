@@ -89,3 +89,32 @@ variable "repositories" {
     lifecycle_policy     = optional(string, "")
   }))
 }
+
+variable "cluster_name" {
+  description = "The name of the ECS cluster"
+  type        = string
+}
+
+variable "execution_role_name" {
+  description = "The name of the ECS task execution role"
+  type        = string
+}
+
+variable "service_role_name" {
+  description = "The name of the ECS service role"
+  type        = string
+}
+
+variable "microservices" {
+  description = "Map of ECS microservices"
+  type = map(object({
+    container_port       : number            # Port the container listens to
+    cpu                  : number            # CPU units for the container
+    memory               : number            # Memory in MB for the container
+    desired_count        : number            # Desired number of container instances
+    repository_name      : string            # ECR repository name for each microservice
+    image_version        : string            # Version of the image for each microservice
+    subnets_names        : list(string)      # List of subnet names for the microservice
+    security_group_names : list(string)      # List of security group names for the microservice
+  }))
+}

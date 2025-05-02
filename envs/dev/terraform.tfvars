@@ -77,7 +77,7 @@ rt_association_parameters = {
 }
 
 security_group_parameters = {
-  sgrp--cmrs-app-01 = {
+  sgrp-cmrs-app-01 = {
     name                   = "sgrp-cmrs-app-01"
     description            = "Security group of CMRS Apps"
     revoke_rules_on_delete = true
@@ -137,5 +137,66 @@ repositories = {
   ]
 }
 EOT
+  }
+}
+
+cluster_name = "cmrs-ecs-cluster"
+execution_role_name = "ecs-task-execution-role"
+service_role_name   = "ecs-service-role"
+
+microservices = {
+  user_management = {
+    container_port       = 8085
+    cpu                  = 256
+    memory               = 512
+    desired_count        = 2
+    repository_name      = "ecr-cmrs-app"
+    image_version        = "v1.0.0"
+    subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
+    security_group_names = ["sgrp-cmrs-app-01"]
+  }
+
+  course_management = {
+    container_port       = 8081
+    cpu                  = 256
+    memory               = 512
+    desired_count        = 2
+    repository_name      = "ecr-cmrs-app"
+    image_version        = "v1.0.0"
+    subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
+    security_group_names = ["sgrp-cmrs-app-01"]
+  }
+
+  course_registration = {
+    container_port       = 8083
+    cpu                  = 256
+    memory               = 512
+    desired_count        = 2
+    repository_name      = "ecr-cmrs-app"
+    image_version        = "v1.0.0"
+    subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
+    security_group_names = ["sgrp-cmrs-app-01"]
+  }
+
+  notification = {
+    container_port       = 8084
+    cpu                  = 256
+    memory               = 512
+    desired_count        = 1
+    repository_name      = "ecr-cmrs-app"
+    image_version        = "v1.0.0"
+    subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
+    security_group_names = ["sgrp-cmrs-app-01"]
+  }
+
+  course_recommendation = {
+    container_port       = 8082
+    cpu                  = 256
+    memory               = 512
+    desired_count        = 1
+    repository_name      = "ecr-cmrs-app"
+    image_version        = "v1.0.0"
+    subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
+    security_group_names = ["sgrp-cmrs-app-01"]
   }
 }

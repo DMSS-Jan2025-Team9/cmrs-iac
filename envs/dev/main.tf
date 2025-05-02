@@ -34,3 +34,32 @@ module "ecr" {
   source      = "../../modules/ecr"
   repositories = var.repositories  # Pass the repositories defined in dev variables
 }
+module "ecs_cluster" {
+  source      = "../../modules/ecs_cluster"
+  cluster_name = var.cluster_name
+}
+
+module "iam_role" {
+  source = "../../modules/iam_role"
+
+  execution_role_name = var.execution_role_name
+  service_role_name   = var.service_role_name
+}
+
+module "microservices" {
+  source = "../../modules/ecs_microservice"
+
+  for_each = var.microservices
+
+  service_name       = each.key
+  container_image    = "${module.ecr.repository_uris[each.value.repository_name]}:${each.value.image_version}"  # Corrected dynamic assignment for image version
+  container_port     = each.value.container_port
+  cpu                = each.value.cpu
+  memory             = each.value.memory
+  desired_count      = each.value.desired_count
+
+  subnets            = [for subnet_name in each.value.subnets_names : module.subnet.subnet_ids_map[subnet_name]] 
+  security_group_ids  = [for sg_name in each.value.security_group_names : module.security_group.security_group_ids_map[sg_name]] 
+  execution_role_arn = module.iam_role.ecs_service_role_arn
+  ecs_cluster_id     = module.ecs_cluster.ecs_cluster_id
+}
