@@ -128,6 +128,11 @@ variable "microservices" {
     subnets_names        : list(string)      # List of subnet names for the microservice
     security_group_names : list(string)      # List of security group names for the microservice
     tags                 = optional(map(string), {})
+    autoscaling = object({                   # Autoscaling configuration for the microservice
+      min_capacity      = number
+      max_capacity      = number
+      cpu_target_value  = number
+    })
   }))
 }
 

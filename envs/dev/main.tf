@@ -76,6 +76,19 @@ module "microservices" {
   aws_region = var.aws_region
 }
 
+module "ecs_autoscaling" {
+  source = "../../modules/ecs_autoscaling"
+
+  for_each = var.microservices
+
+  ecs_cluster_id   = module.ecs_cluster.ecs_cluster_id
+  service_name     = each.key
+
+  min_capacity     = each.value.autoscaling.min_capacity
+  max_capacity     = each.value.autoscaling.max_capacity
+  cpu_target_value = each.value.autoscaling.cpu_target_value
+}
+
 module "rds" {
   source = "../../modules/rds"
 

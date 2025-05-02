@@ -298,7 +298,7 @@ microservices = {
     container_port       = 8085
     cpu                  = 256
     memory               = 512
-    desired_count        = 2
+    desired_count        = 1
     repository_name      = "ecr-cmrs-user-management"
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
@@ -308,13 +308,18 @@ microservices = {
       "Project"     = "CMRS"
       "Service"     = "user-management"
     }
+    autoscaling = {
+      min_capacity      = 1
+      max_capacity      = 4
+      cpu_target_value  = 75
+    }
   }
 
   course-management = {
     container_port       = 8081
     cpu                  = 256
     memory               = 512
-    desired_count        = 2
+    desired_count        = 1
     repository_name      = "ecr-cmrs-course-management"
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
@@ -324,13 +329,18 @@ microservices = {
       "Project"     = "CMRS"
       "Service"     = "course-management"
     }
+    autoscaling = {
+      min_capacity      = 1
+      max_capacity      = 3
+      cpu_target_value  = 75
+    }
   }
 
   course-registration = {
     container_port       = 8083
     cpu                  = 256
     memory               = 512
-    desired_count        = 2
+    desired_count        = 1
     repository_name      = "ecr-cmrs-course-registration"
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
@@ -339,6 +349,11 @@ microservices = {
       "Environment" = "dev"
       "Project"     = "CMRS"
       "Service"     = "course-registration"
+    }
+    autoscaling = {
+      min_capacity      = 1
+      max_capacity      = 4
+      cpu_target_value  = 75
     }
   }
 
@@ -356,6 +371,11 @@ microservices = {
       "Project"     = "CMRS"
       "Service"     = "notification"
     }
+    autoscaling = {
+      min_capacity      = 1
+      max_capacity      = 2
+      cpu_target_value  = 75
+    }
   }
 
   course-recommendation = {
@@ -372,8 +392,15 @@ microservices = {
       "Project"     = "CMRS"
       "Service"     = "course-recommendation"
     }
+    autoscaling = {
+      min_capacity      = 1
+      max_capacity      = 2
+      cpu_target_value  = 75
+    }
   }
 }
+
+
 
 rds_config = {
   db_name               = "cmrsRDS"
