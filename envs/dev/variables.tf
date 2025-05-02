@@ -130,3 +130,22 @@ variable "microservices" {
     tags                 = optional(map(string), {})
   }))
 }
+
+variable "rds_config" {
+  description = "RDS configuration"
+  type = object({
+    db_name               = string
+    db_identifier         = string
+    db_instance_class     = string
+    db_engine             = string
+    db_engine_version     = string
+    db_username           = string
+    db_password           = string
+    db_port               = number
+    db_allocated_storage  = number
+    db_subnet_group_name  = string
+    multi_az              = bool
+    security_group_name   = string
+    subnets_names            = list(string) 
+  })
+}

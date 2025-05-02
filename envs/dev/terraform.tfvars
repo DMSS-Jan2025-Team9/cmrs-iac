@@ -107,6 +107,36 @@ security_group_parameters = {
         description = "Allow all egress"
       }
     ]
+  },
+  sgrp-cmrs-rds-01 = {
+    name                   = "sgrp-cmrs-rds-01"
+    description            = "Security group of CMRS RDS"
+    revoke_rules_on_delete = true
+    vpc_name = "vpc-cmrs-app-01"
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Name"        = "sgrp-cmrs-rds-01"
+    }
+    ingress = [
+      {
+        from_port   = 3306
+        to_port     = 3306
+        protocol    = "tcp"
+        self        = true
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow ingress to database"
+      }
+    ]
+    egress = [
+      {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow all egress"
+      }
+    ]
   }
 }
 
@@ -343,4 +373,20 @@ microservices = {
       "Service"     = "course-recommendation"
     }
   }
+}
+
+rds_config = {
+  db_name               = "cmrsRDS"
+  db_identifier         = "cmrs-rds"
+  db_instance_class     = "db.t4g.micro"
+  db_engine             = "mysql"
+  db_engine_version     = "8.0.40"
+  db_username           = "cmrs"
+  db_password           = "password123"
+  db_port               = 3306
+  db_allocated_storage  = 20
+  db_subnet_group_name  = "cmrs-db-subnet-group"
+  multi_az              = false
+  security_group_name   = "sgrp-cmrs-rds-01"
+  subnets_names         = ["subnet-cmrs-app-01","subnet-cmrs-app-02"]
 }

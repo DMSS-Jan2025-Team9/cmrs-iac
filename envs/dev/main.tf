@@ -75,3 +75,21 @@ module "microservices" {
   log_group_name     = module.log_groups[each.key].log_group_name
   aws_region = var.aws_region
 }
+
+module "rds" {
+  source = "../../modules/rds"
+
+  db_name               = var.rds_config.db_name
+  db_identifier         = var.rds_config.db_identifier
+  db_instance_class     = var.rds_config.db_instance_class
+  db_engine             = var.rds_config.db_engine
+  db_engine_version     = var.rds_config.db_engine_version
+  db_username           = var.rds_config.db_username
+  db_password           = var.rds_config.db_password
+  db_port               = var.rds_config.db_port
+  db_allocated_storage  = var.rds_config.db_allocated_storage
+  security_group_id     = module.security_group.security_group_ids_map[var.rds_config.security_group_name] 
+  db_subnet_group_name  = var.rds_config.db_subnet_group_name
+  multi_az              = var.rds_config.multi_az
+  subnet_ids            = [for subnet_name in var.rds_config.subnets_names : module.subnet.subnet_ids_map[subnet_name]] 
+}
