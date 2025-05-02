@@ -145,7 +145,7 @@ execution_role_name = "ecs-task-execution-role"
 service_role_name   = "ecs-service-role"
 
 microservices = {
-  user_management = {
+  user-management = {
     container_port       = 8085
     cpu                  = 256
     memory               = 512
@@ -156,7 +156,7 @@ microservices = {
     security_group_names = ["sgrp-cmrs-app-01"]
   }
 
-  course_management = {
+  course-management = {
     container_port       = 8081
     cpu                  = 256
     memory               = 512
@@ -167,7 +167,7 @@ microservices = {
     security_group_names = ["sgrp-cmrs-app-01"]
   }
 
-  course_registration = {
+  course-registration = {
     container_port       = 8083
     cpu                  = 256
     memory               = 512
@@ -189,7 +189,7 @@ microservices = {
     security_group_names = ["sgrp-cmrs-app-01"]
   }
 
-  course_recommendation = {
+  course-recommendation = {
     container_port       = 8082
     cpu                  = 256
     memory               = 512
