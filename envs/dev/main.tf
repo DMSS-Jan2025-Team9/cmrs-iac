@@ -70,7 +70,7 @@ module "microservices" {
 
   subnets            = [for subnet_name in each.value.subnets_names : module.subnet.subnet_ids_map[subnet_name]] 
   security_group_ids  = [for sg_name in each.value.security_group_names : module.security_group.security_group_ids_map[sg_name]] 
-  execution_role_arn = module.iam_role.ecs_service_role_arn
+  execution_role_arn = module.iam_role.ecs_task_execution_role_arn
   ecs_cluster_id     = module.ecs_cluster.ecs_cluster_id
   log_group_name     = module.log_groups[each.key].log_group_name
   aws_region = var.aws_region
