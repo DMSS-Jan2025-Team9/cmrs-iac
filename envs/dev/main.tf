@@ -62,7 +62,7 @@ module "microservices" {
   for_each = var.microservices
 
   service_name       = each.key
-  container_image    = "${module.ecr.repository_uris[each.value.repository_name]}/${each.key}:${each.value.image_version}"  # Corrected dynamic assignment for image version
+  container_image    = "${module.ecr.repository_uris[each.value.repository_name]}:${each.value.image_version}"  # Corrected dynamic assignment for image version
   container_port     = each.value.container_port
   cpu                = each.value.cpu
   memory             = each.value.memory

@@ -111,13 +111,130 @@ security_group_parameters = {
 }
 
 repositories = {
-  "ecr-cmrs-app" = {
-    repository_name      = "ecr-cmrs-app"
+  "ecr-cmrs-user-management" = {
+    repository_name      = "ecr-cmrs-user-management"
     image_tag_mutability = "IMMUTABLE"
     tags = {
       "Environment" = "dev"
       "Project"     = "CMRS"
-      "Purpose"     = "ECR for backend services"
+      "Service"     = "user-management"
+      "Purpose"     = "ECR for user-management service"
+    }
+    lifecycle_policy = <<EOT
+{
+  "rules": [
+    {
+      "rulePriority": 1,
+      "description": "Expire untagged images older than 30 days",
+      "selection": {
+        "tagStatus": "untagged",
+        "countType": "sinceImagePushed",
+        "countUnit": "days",
+        "countNumber": 30
+      },
+      "action": {
+        "type": "expire"
+      }
+    }
+  ]
+}
+EOT
+  },
+  "ecr-cmrs-course-management" = {
+    repository_name      = "ecr-cmrs-course-management"
+    image_tag_mutability = "IMMUTABLE"
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Service"     = "course-management"
+      "Purpose"     = "ECR for course-management service"
+    }
+    lifecycle_policy = <<EOT
+{
+  "rules": [
+    {
+      "rulePriority": 1,
+      "description": "Expire untagged images older than 30 days",
+      "selection": {
+        "tagStatus": "untagged",
+        "countType": "sinceImagePushed",
+        "countUnit": "days",
+        "countNumber": 30
+      },
+      "action": {
+        "type": "expire"
+      }
+    }
+  ]
+}
+EOT
+  },
+  "ecr-cmrs-course-registration" = {
+    repository_name      = "ecr-cmrs-course-registration"
+    image_tag_mutability = "IMMUTABLE"
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Service"     = "course-registration"
+      "Purpose"     = "ECR for course-registration service"
+    }
+    lifecycle_policy = <<EOT
+{
+  "rules": [
+    {
+      "rulePriority": 1,
+      "description": "Expire untagged images older than 30 days",
+      "selection": {
+        "tagStatus": "untagged",
+        "countType": "sinceImagePushed",
+        "countUnit": "days",
+        "countNumber": 30
+      },
+      "action": {
+        "type": "expire"
+      }
+    }
+  ]
+}
+EOT
+  },
+  "ecr-cmrs-notification" = {
+    repository_name      = "ecr-cmrs-notification"
+    image_tag_mutability = "IMMUTABLE"
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Service"     = "notification"
+      "Purpose"     = "ECR for notification service"
+    }
+    lifecycle_policy = <<EOT
+{
+  "rules": [
+    {
+      "rulePriority": 1,
+      "description": "Expire untagged images older than 30 days",
+      "selection": {
+        "tagStatus": "untagged",
+        "countType": "sinceImagePushed",
+        "countUnit": "days",
+        "countNumber": 30
+      },
+      "action": {
+        "type": "expire"
+      }
+    }
+  ]
+}
+EOT
+  },
+  "ecr-cmrs-course-recommendation" = {
+    repository_name      = "ecr-cmrs-course-recommendation"
+    image_tag_mutability = "IMMUTABLE"
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Service"     = "course-recommendation"
+      "Purpose"     = "ECR for course-recommendation service"
     }
     lifecycle_policy = <<EOT
 {
@@ -152,7 +269,7 @@ microservices = {
     cpu                  = 256
     memory               = 512
     desired_count        = 2
-    repository_name      = "ecr-cmrs-app"
+    repository_name      = "ecr-cmrs-user-management"
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
     security_group_names = ["sgrp-cmrs-app-01"]
@@ -168,7 +285,7 @@ microservices = {
     cpu                  = 256
     memory               = 512
     desired_count        = 2
-    repository_name      = "ecr-cmrs-app"
+    repository_name      = "ecr-cmrs-course-management"
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
     security_group_names = ["sgrp-cmrs-app-01"]
@@ -184,7 +301,7 @@ microservices = {
     cpu                  = 256
     memory               = 512
     desired_count        = 2
-    repository_name      = "ecr-cmrs-app"
+    repository_name      = "ecr-cmrs-course-registration"
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
     security_group_names = ["sgrp-cmrs-app-01"]
@@ -200,7 +317,7 @@ microservices = {
     cpu                  = 256
     memory               = 512
     desired_count        = 1
-    repository_name      = "ecr-cmrs-app"
+    repository_name      = "ecr-cmrs-notification"
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
     security_group_names = ["sgrp-cmrs-app-01"]
@@ -216,7 +333,7 @@ microservices = {
     cpu                  = 256
     memory               = 512
     desired_count        = 1
-    repository_name      = "ecr-cmrs-app"
+    repository_name      = "ecr-cmrs-course-recommendation"
     image_version        = "v1.0.0"
     subnets_names        = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
     security_group_names = ["sgrp-cmrs-app-01"]
