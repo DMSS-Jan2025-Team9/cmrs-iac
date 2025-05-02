@@ -129,6 +129,10 @@ https://docs.github.com/en/actions/use-cases-and-examples/deploying/deploying-to
 # CODE REFACTORING - MODULARISED the code
 1) envs/bootstrap - only need to run once
 2) envs/dev - DEV environment
+   run terraform commands:
+    terraform init
+    terraform plan  -var-file="terraform.tfvars"
+    terraform apply -var-file="terraform.tfvars"
 
 
 # AWS Credential

@@ -29,3 +29,8 @@ module "security_group" {
   vpc_ids_map               = module.vpc.vpc_ids_map  # Pass the vpc_ids_map from the VPC module
   security_group_parameters = var.security_group_parameters
 }
+
+module "ecr" {
+  source      = "../../modules/ecr"
+  repositories = var.repositories  # Pass the repositories defined in dev variables
+}

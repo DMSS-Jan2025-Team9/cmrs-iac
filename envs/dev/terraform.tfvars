@@ -5,6 +5,7 @@ vpc_parameters = {
     enable_dns_hostnames = true
     tags = {
       "Environment" = "dev"
+      "Project"     = "CMRS"
       "Name"        = "vpc-cmrs-app-01"
     }
   }
@@ -18,6 +19,7 @@ subnet_parameters = {
     map_public_ip_on_launch = true
     tags = {
       "Environment" = "dev"
+      "Project"     = "CMRS"
       "Name"        = "subnet-cmrs-app-01"
     }
   },
@@ -28,6 +30,7 @@ subnet_parameters = {
     map_public_ip_on_launch = true
     tags = {
       "Environment" = "dev"
+      "Project"     = "CMRS"
       "Name"        = "subnet-cmrs-app-02"
     }
   }
@@ -38,6 +41,7 @@ igw_parameters = {
     vpc_name = "vpc-cmrs-app-01"
     tags = {
       "Environment" = "dev"
+      "Project"     = "CMRS"
       "Name"        = "igw-cmrs-app-01"
     }
   }
@@ -55,6 +59,7 @@ rt_parameters = {
     ]
     tags = {
       "Environment" = "dev"
+      "Project"     = "CMRS"
       "Name"        = "rt-cmrs-app-01"
     }
   }
@@ -79,6 +84,7 @@ security_group_parameters = {
     vpc_name = "vpc-cmrs-app-01"
     tags = {
       "Environment" = "dev"
+      "Project"     = "CMRS"
       "Name"        = "sgrp-cmrs-app-01"
     }
     ingress = [
@@ -100,5 +106,36 @@ security_group_parameters = {
         description = "Allow all egress"
       }
     ]
+  }
+}
+
+repositories = {
+  "ecr-cmrs-app" = {
+    repository_name      = "ecr-cmrs-app"
+    image_tag_mutability = "IMMUTABLE"
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Purpose"     = "ECR for backend services"
+    }
+    lifecycle_policy = <<EOT
+{
+  "rules": [
+    {
+      "rulePriority": 1,
+      "description": "Expire untagged images older than 30 days",
+      "selection": {
+        "tagStatus": "untagged",
+        "countType": "sinceImagePushed",
+        "countUnit": "days",
+        "countNumber": 30
+      },
+      "action": {
+        "type": "expire"
+      }
+    }
+  ]
+}
+EOT
   }
 }

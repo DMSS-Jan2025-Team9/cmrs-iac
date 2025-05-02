@@ -79,3 +79,13 @@ variable "security_group_parameters" {
   }))
   default = {}
 }
+
+variable "repositories" {
+  description = "A map of repositories for the dev environment"
+  type = map(object({
+    repository_name      = string
+    image_tag_mutability = string
+    tags                 = optional(map(string), {})
+    lifecycle_policy     = optional(string, "")
+  }))
+}
