@@ -150,8 +150,8 @@ security_group_parameters = {
     }
     ingress = [
       {
-        from_port   = 5672
-        to_port     = 5672
+        from_port   = 5671
+        to_port     = 5671
         protocol    = "tcp"
         self        = false
         cidr_blocks = ["0.0.0.0/0"]
@@ -498,7 +498,7 @@ rabbitmq_config = {
   password            = "cmrsRabbitP@55w0rd"
   configuration_data  = <<-EOT
     consumer_timeout = 1800000
-    listeners.tcp.default = 5672
+    listeners.tcp.default = 5671
   EOT
   maintenance_window = {
     day      = "MONDAY"
