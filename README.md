@@ -49,15 +49,61 @@ terraform init
 terraform plan 
 terraform apply
 
-# S3 bucket creation
+# S3 bucket creation - frontend s3 bucket and cloudfront
 1) Navigate to s3 folder
+2) run terraform commands:
+terraform init
+terraform plan  -var-file="dev.tfvars"
+terraform apply -var-file="dev.tfvars"
+
+
+# network creation - VPC, subnets, security groups
+1) navigate to envs/dev folder
+2) run terraform commands:
+terraform init
+terraform plan  -var-file="terraform.tfvars"
+terraform apply -var-file="terraform.tfvars"
+
+├── backend.tf           # Backend configuration file
+├── envs/                # Folder for environment-specific configurations
+│   ├── dev/
+│   │   ├── main.tf      # Dev environment-specific resources and module calls
+│   │   ├── terraform.tfvars  # Variable values for dev environment
+│   │   └── outputs.tf   # Dev-specific outputs
+│   ├── prod/
+│   │   ├── main.tf      # Prod environment-specific resources and module calls
+│   │   ├── terraform.tfvars  # Variable values for prod environment
+│   │   └── outputs.tf   # Prod-specific outputs
+├── modules/             # Reusable Terraform modules (vpc, subnet, sg, etc.)
+│   ├── vpc/
+│   ├── subnet/
+│   └── security_group/
+└── terraform.tfvars     # Optional default variable values
+
+
+# ECR
+1) Navigate to ecr folder
+2) run terraform commands:
+terraform init
+terraform plan  -var-file="dev.tfvars"
+terraform apply -var-file="dev.tfvars"
+
+reference: https://spacelift.io/blog/terraform-ecr
+
+# ECS
+1) Navigate to ecs folder
 2) run terraform commands:
 terraform init
 terraform plan 
 terraform apply -var-file="dev.tfvars"
+reference: https://spacelift.io/blog/terraform-ecs
 
 
 # Frontend CI/CD - using GitHub & AWS S3 + CloudFront
+Setup:
+1) Create s3 bucket and setup cloudfront using IAC script - S3 folder
+2) Integrate Github action for CI/CD
+
 https://blog.everestek.com/deploy-react-app-to-aws-s3-using-terraform/
 https://medium.com/cloud-native-daily/mastering-ci-cd-deploying-a-react-js-app-to-aws-s3-with-github-actions-and-hosting-it-b1ce82360331
 
@@ -66,6 +112,27 @@ React -> Github action -> Amazon S3 -> CloudFront
 1) AWS S3 bucket for frontend file: cmrs-frontend-hosting
 URL: https://ap-southeast-1.console.aws.amazon.com/s3/buckets/cmrs-frontend-hosting?region=ap-southeast-1&bucketType=general&tab=objects
 2) Frontend CloudFront URL: https://d1x5otaft5jht9.cloudfront.net/login
+
+
+# Backend CI/CD using AWS and GitHub Action
+Setup:
+1) create ECR repository
+2) create ECS Task definition, cluster, service
+3) Integrate with Github action
+
+Reference: https://kiranpawar.hashnode.dev/setting-up-a-cicd-pipeline-for-a-spring-boot-application-on-aws
+
+https://github.com/in28minutes/deploy-spring-microservices-to-aws-ecs-fargate
+
+https://docs.github.com/en/actions/use-cases-and-examples/deploying/deploying-to-amazon-elastic-container-service
+
+# CODE REFACTORING - MODULARISED the code
+1) envs/bootstrap - only need to run once
+2) envs/dev - DEV environment
+   run terraform commands:
+    terraform init
+    terraform plan  -var-file="terraform.tfvars"
+    terraform apply -var-file="terraform.tfvars"
 
 
 # AWS Credential
