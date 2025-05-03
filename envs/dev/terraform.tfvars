@@ -167,6 +167,44 @@ security_group_parameters = {
         description = "Allow all egress"
       }
     ]
+  },
+  sgrp-cmrs-ec2 = {
+    name                   = "sgrp-cmrs-ec2"
+    description            = "Security group of CMRS EC2 instance"
+    revoke_rules_on_delete = true
+    vpc_name = "vpc-cmrs-app-01"
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Name"        = "sgrp-cmrs-ec2"
+    }
+    ingress = [
+      {
+        from_port   = 22
+        to_port     = 22
+        protocol    = "tcp"
+        self        = false
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow ingress to database"
+      },
+      {
+        from_port   = 3389
+        to_port     = 3389
+        protocol    = "tcp"
+        self        = false
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow ingress to database"
+      }
+    ]
+    egress = [
+      {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow all egress"
+      }
+    ]
   }
 }
 
@@ -450,7 +488,7 @@ rds_config = {
 
 rabbitmq_config = {
   broker_name         = "rabbitmq-broker"
-  engine_version      = "3.13.7"
+  engine_version      = "3.13"
   host_instance_type  = "mq.t3.micro"
   deployment_mode     = "SINGLE_INSTANCE"
   subnets          = ["subnet-cmrs-app-01"]
@@ -460,6 +498,7 @@ rabbitmq_config = {
   password            = "cmrsRabbitP@55w0rd"
   configuration_data  = <<-EOT
     consumer_timeout = 1800000
+    listeners.tcp.default = 5672
   EOT
   maintenance_window = {
     day      = "MONDAY"
@@ -467,3 +506,24 @@ rabbitmq_config = {
     timezone = "UTC"
   }
 }
+
+ec2_instances = [
+  {
+    instance_name     = "cmrs-github-runner-01"
+    ami_id            = "ami-0c1907b6d738188e5" 
+    instance_type     = "t2.micro"
+    key_name          = "ssh-cmrs-ops-console"
+    subnet_name       = "subnet-cmrs-app-01"
+    security_groups   = ["sgrp-cmrs-ec2"]
+    availability_zone = "ap-southeast-1a"
+  },
+  {
+    instance_name     = "cmrs-github-runner-02"
+    ami_id            = "ami-0c1907b6d738188e5" 
+    instance_type     = "t2.micro"
+    key_name          = "ssh-cmrs-ops-console"
+    subnet_name       = "subnet-cmrs-app-02"
+    security_groups   = ["sgrp-cmrs-ec2"]
+    availability_zone = "ap-southeast-1b"
+  }
+]

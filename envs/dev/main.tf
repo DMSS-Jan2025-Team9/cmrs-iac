@@ -114,3 +114,11 @@ module "rabbitmq" {
   subnet_ids_map = module.subnet.subnet_ids_map
   security_group_ids_map = module.security_group.security_group_ids_map
 }
+
+module "ec2_instances" {
+  source           = "../../modules/ec2"
+  ec2_instances    = var.ec2_instances
+
+  subnet_ids_map = module.subnet.subnet_ids_map
+  security_group_ids_map = module.security_group.security_group_ids_map
+}

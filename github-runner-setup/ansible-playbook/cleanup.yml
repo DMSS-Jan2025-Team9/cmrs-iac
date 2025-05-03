@@ -1,0 +1,95 @@
+---
+- name: System and Docker Cleanup
+  hosts: ec2_hosts
+  become: yes
+  tasks:
+    
+    # Clean Docker containers that are stopped
+    - name: Prune stopped Docker containers
+      docker_container:
+        name: "{{ item }}"
+        state: absent
+      with_items: "{{ lookup('pipe', 'docker ps -a -q') | splitlines() }}"
+      ignore_errors: yes
+    
+    # Remove unused Docker images
+    - name: Prune unused Docker images
+      command: docker image prune -f
+      ignore_errors: yes
+    
+    # Remove unused Docker volumes
+    - name: Prune unused Docker volumes
+      command: docker volume prune -f
+      ignore_errors: yes
+    
+    # Clean Docker system (containers, images, volumes, networks)
+    - name: Clean up all unused Docker resources
+      command: docker system prune -a -f
+      ignore_errors: yes
+
+    # Clear Docker logs
+    - name: Remove old Docker logs
+      shell: "find /var/lib/docker/containers/ -name *-json.log -exec rm -f {} \\;"
+      ignore_errors: yes
+
+    # Clean up system logs
+    - name: Vacuum journal logs older than 3 days
+      command: journalctl --vacuum-time=3d
+      ignore_errors: yes
+
+    # Clean up all apt cache
+    - name: Clean apt cache
+      apt:
+        autoclean: yes
+        autoremove: yes
+      ignore_errors: yes
+
+    # Remove unused packages
+    - name: Remove unnecessary packages
+      apt:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - "docker-ce"
+        - "docker-ce-cli"
+        - "containerd.io"
+      ignore_errors: yes
+
+    # Clear all files in /tmp (if required)
+    - name: Remove all files in /tmp
+      file:
+        path: "/tmp/{{ item }}"
+        state: absent
+      with_fileglob:
+        - "/tmp/*"
+      ignore_errors: yes
+
+    # Clear log files in /var/log (except for essential logs)
+    - name: Clean up log files in /var/log
+      shell: "find /var/log/ -type f -name '*.log' -exec rm -f {} \\;"
+      ignore_errors: yes
+
+    # Resize filesystem (optional step, depends on the environment)
+    - name: Resize filesystem if required (Example for AWS EC2)
+      command: "resize2fs /dev/xvda1"
+      when: ansible_facts.device_xvda1 is defined
+      ignore_errors: yes
+
+    # Clean up all installed packages except essential ones
+    - name: Get a list of all installed packages
+      command: dpkg --get-selections
+      register: dpkg_output
+
+    - name: Remove all installed packages except essential ones
+      apt:
+        name: "{{ item }}"
+        state: absent
+      with_items: "{{ dpkg_output.stdout_lines }}"
+      when: "'apt' not in item and 'dpkg' not in item and 'systemd' not in item and 'sudo' not in item and 'bash' not in item and 'coreutils' not in item and 'libc6' not in item"
+      ignore_errors: yes
+      
+    - name: Clean apt cache
+      become: true
+      apt:
+        autoclean: yes
+        autoremove: yes

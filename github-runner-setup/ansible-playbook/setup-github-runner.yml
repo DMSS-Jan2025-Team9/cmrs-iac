@@ -1,0 +1,94 @@
+---
+- name: Setup GitHub Self-Hosted Runner
+  hosts: github_runner
+  vars:
+    docker_user: ubuntu
+    github_repo: https://github.com/DMSS-Jan2025-Team9
+    github_token: AEZQDYPW4FIZIW2ISOO2HG3ICZFCQ
+    github_runner_group: "cmrs-runner-group"
+
+  tasks:
+    - name: Install required packages
+      become: true
+      apt:
+        name:
+          - jq
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        update_cache: yes
+
+    - name: Add Docker GPG key
+      become: true
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      become: true
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        update_cache: yes
+
+    - name: Install Docker
+      become: true
+      apt:
+        name: docker-ce
+        update_cache: yes
+
+    - name: Add user to docker group
+      become: true
+      user:
+        name: "{{ docker_user }}"
+        groups: docker
+        append: yes
+
+    - name: Create actions-runner directory
+      become: true
+      file:
+        path: /opt/actions-runner
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Download GitHub runner
+      become: true
+      shell: |
+        mkdir -p /opt/actions-runner && cd /opt/actions-runner
+        curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/download/v2.323.0/actions-runner-linux-x64-2.323.0.tar.gz
+        tar xzf actions-runner.tar.gz
+      args:
+        creates: /opt/actions-runner/actions-runner.tar.gz
+
+    - name: Configure GitHub runner
+      become: true
+      become_user: ubuntu
+      command: >
+        ./config.sh
+        --url {{ github_repo }}
+        --token {{ github_token }}
+        --name {{ inventory_hostname }}
+        --labels {{ inventory_hostname }}
+        --runnergroup {{ github_runner_group }}
+        --unattended
+      args:
+        chdir: /opt/actions-runner
+      when:
+        - github_repo is defined
+        - github_token is defined
+        - github_runner_group is defined
+
+    - name: Install GitHub Actions runner as a service
+      become: true
+      command: ./svc.sh install
+      args:
+        chdir: /opt/actions-runner
+
+    - name: Start GitHub Actions runner service
+      become: true
+      command: ./svc.sh start
+      args:
+        chdir: /opt/actions-runner
