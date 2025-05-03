@@ -137,6 +137,36 @@ security_group_parameters = {
         description = "Allow all egress"
       }
     ]
+  },
+  sgrp-cmrs-rabbitmq = {
+    name                   = "sgrp-cmrs-rabbitmq"
+    description            = "Security group of CMRS RabbitMQ"
+    revoke_rules_on_delete = true
+    vpc_name = "vpc-cmrs-app-01"
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Name"        = "sgrp-cmrs-rabbitmq"
+    }
+    ingress = [
+      {
+        from_port   = 5672
+        to_port     = 5672
+        protocol    = "tcp"
+        self        = false
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow ingress to database"
+      }
+    ]
+    egress = [
+      {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow all egress"
+      }
+    ]
   }
 }
 
@@ -416,4 +446,24 @@ rds_config = {
   multi_az              = false
   security_group_name   = "sgrp-cmrs-rds-01"
   subnets_names         = ["subnet-cmrs-app-01","subnet-cmrs-app-02"]
+}
+
+rabbitmq_config = {
+  broker_name         = "rabbitmq-broker"
+  engine_version      = "3.13.7"
+  host_instance_type  = "mq.t3.micro"
+  deployment_mode     = "SINGLE_INSTANCE"
+  subnets          = ["subnet-cmrs-app-01"]
+  publicly_accessible = false
+  security_groups = ["sgrp-cmrs-rabbitmq"]
+  username            = "rabbit_admin"
+  password            = "cmrsRabbitP@55w0rd"
+  configuration_data  = <<-EOT
+    consumer_timeout = 1800000
+  EOT
+  maintenance_window = {
+    day      = "MONDAY"
+    time     = "18:00"
+    timezone = "UTC"
+  }
 }

@@ -106,3 +106,11 @@ module "rds" {
   multi_az              = var.rds_config.multi_az
   subnet_ids            = [for subnet_name in var.rds_config.subnets_names : module.subnet.subnet_ids_map[subnet_name]] 
 }
+
+module "rabbitmq" {
+  source = "../../modules/rabbitmq"
+  rabbitmq_config = var.rabbitmq_config
+
+  subnet_ids_map = module.subnet.subnet_ids_map
+  security_group_ids_map = module.security_group.security_group_ids_map
+}

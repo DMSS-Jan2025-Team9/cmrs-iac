@@ -154,3 +154,25 @@ variable "rds_config" {
     subnets_names            = list(string) 
   })
 }
+
+variable "rabbitmq_config" {
+  type = object({
+    broker_name        = string
+    engine_version     = string
+    host_instance_type = string
+    deployment_mode    = string
+    subnets         = list(string)
+    publicly_accessible = bool
+    security_groups = list(string)
+    username           = string
+    password           = string
+    configuration_data = string
+    maintenance_window = object({
+      day     = string
+      time    = string
+      timezone = string
+    })
+  })
+  sensitive = true
+}
+
