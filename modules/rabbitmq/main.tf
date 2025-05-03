@@ -15,7 +15,7 @@ resource "aws_mq_broker" "rabbitmq_broker" {
   subnet_ids          = [for subnet_name in var.rabbitmq_config.subnets : var.subnet_ids_map[subnet_name]] 
   publicly_accessible = var.rabbitmq_config.publicly_accessible
   security_groups     = [for sgrp in var.rabbitmq_config.security_groups : var.security_group_ids_map[sgrp]] 
-
+  
   configuration {
     id       = aws_mq_configuration.rabbitmq_broker_config.id
     revision = aws_mq_configuration.rabbitmq_broker_config.latest_revision
