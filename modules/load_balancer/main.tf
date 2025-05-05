@@ -18,7 +18,7 @@ resource "aws_lb_target_group" "target_groups" {
   vpc_id      = lookup(var.vpc_ids_map, var.load_balancer_config.vpc_name)   # Look up VPC ID using VPC name
 
   health_check {
-    path                = "/actuator/health"
+    path                = each.value.health_check_path
     protocol            = "HTTP"
     matcher             = "200"
     port                = "traffic-port"

@@ -25,8 +25,9 @@ variable "security_group_ids_map" {
 
 variable "ecs_services" {
   type = list(object({
-    name        = string
-    port        = number
-    path_prefix = string
+    name              = string
+    port              = number
+    path_prefix       = string
+    health_check_path = string
   }))
 }

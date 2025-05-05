@@ -70,9 +70,10 @@ module "load_balancer" {
 
   ecs_services = [
     for name, svc in var.microservices : {
-      name        = name
-      port        = svc.container_port
-      path_prefix = "/${name}/*"
+      name              = name
+      port              = svc.container_port
+      path_prefix       = "/${name}/*"
+      health_check_path = "/${name}/actuator/health"
     }
   ]
 }
