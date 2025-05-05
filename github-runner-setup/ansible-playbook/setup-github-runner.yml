@@ -4,7 +4,7 @@
   vars:
     docker_user: ubuntu
     github_repo: https://github.com/DMSS-Jan2025-Team9
-    github_token: AEZQDYPW4FIZIW2ISOO2HG3ICZFCQ
+    github_token: AEZQDYKRGWEL5WGG32CXUHDIDBRIG
     github_runner_group: "cmrs-runner-group"
 
   tasks:
@@ -17,7 +17,52 @@
           - ca-certificates
           - curl
           - software-properties-common
+          - unzip
+          - zip
+          - git
+          - openjdk-17-jdk
+          - maven
+          - mysql-client
         update_cache: yes
+    
+    - name: Add NodeSource APT repo for Node.js 18
+      become: true
+      apt_key:
+        url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+        state: present
+
+    - name: Add Node.js 18 repo
+      become: true
+      apt_repository:
+        repo: "deb https://deb.nodesource.com/node_18.x {{ ansible_distribution_release }} main"
+        state: present
+        filename: nodesource
+
+    - name: Install Node.js 18 and npm
+      become: true
+      apt:
+        name:
+          - nodejs
+        update_cache: yes
+
+    - name: Download AWS CLI zip
+      become: true
+      get_url:
+        url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+        dest: "/tmp/awscliv2.zip"
+
+    - name: Unzip AWS CLI
+      become: true
+      unarchive:
+        src: "/tmp/awscliv2.zip"
+        dest: "/tmp/"
+        remote_src: yes
+
+    - name: Install AWS CLI
+      become: true
+      command: "/tmp/aws/install"
+      args:
+        creates: /usr/local/bin/aws
 
     - name: Add Docker GPG key
       become: true
@@ -62,6 +107,17 @@
         tar xzf actions-runner.tar.gz
       args:
         creates: /opt/actions-runner/actions-runner.tar.gz
+
+    - name: Set ownership of actions-runner directory
+      become: true
+      command: chown -R ubuntu:ubuntu /opt/actions-runner
+
+    - name: Add ubuntu user to docker group
+      become: true
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
 
     - name: Configure GitHub runner
       become: true
