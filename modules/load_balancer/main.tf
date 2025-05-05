@@ -49,6 +49,8 @@ resource "aws_lb_listener" "https_listener" {
   load_balancer_arn = aws_alb.application_load_balancer.arn
   port              = 443
   protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = var.load_balancer_config.acm_certificate_arn  # Must be provided
 
   default_action {
     type = "fixed-response"
@@ -61,17 +63,12 @@ resource "aws_lb_listener" "https_listener" {
   }
 }
 
-resource "aws_lb_listener_certificate" "default" {
-  certificate_arn = var.load_balancer_config.acm_arn
-  listener_arn    = aws_lb_listener.https_listener.arn
-}
-
 resource "aws_lb_listener_rule" "service_routes" {
   for_each = {
     for svc in var.ecs_services : svc.name => svc
   }
 
-  listener_arn = aws_lb_listener.http_listener.arn
+  listener_arn = aws_lb_listener.https_listener.arn
   priority     = 100 + index(var.ecs_services[*].name, each.key)
 
   action {

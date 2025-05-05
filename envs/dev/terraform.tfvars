@@ -367,11 +367,11 @@ service_role_name   = "ecs-service-role"
 log_retention_in_days = 14
 
 load_balancer_config = {
-  alb_name          = "alb-cmrs-app"
-  subnets           = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
-  security_groups   = ["sgrp-cmrs-app-01"]
-  vpc_name          = "vpc-cmrs-app-01"
-  acm_arn           = "arn:aws:acm:ap-southeast-1:585008058878:certificate/324abf67-a92d-46b2-92c7-4c8b2f213ab4"
+  alb_name            = "alb-cmrs-app"
+  subnets             = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
+  security_groups     = ["sgrp-cmrs-app-01"]
+  vpc_name            = "vpc-cmrs-app-01"
+  acm_certificate_arn = "arn:aws:acm:ap-southeast-1:585008058878:certificate/324abf67-a92d-46b2-92c7-4c8b2f213ab4"
 }
 
 microservices = {

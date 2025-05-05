@@ -4,7 +4,7 @@ variable "load_balancer_config" {
     subnets                   = list(string)
     security_groups           = list(string)
     vpc_name                  = string
-    acm_arn           = optional(string)
+    acm_certificate_arn       = optional(string)
   })
 }
 

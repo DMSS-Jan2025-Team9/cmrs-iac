@@ -123,11 +123,11 @@ variable "log_retention_in_days" {
 variable "load_balancer_config" {
   description = "Application load balancer configuration for ECS services"
   type = object({
-    alb_name          = string
-    subnets           = list(string)
-    security_groups   = list(string)
-    vpc_name          = string
-    acm_arn           = optional(string)
+    alb_name            = string
+    subnets             = list(string)
+    security_groups     = list(string)
+    vpc_name            = string
+    acm_certificate_arn = optional(string)
   })
 }
 
