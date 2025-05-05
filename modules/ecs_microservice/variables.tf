@@ -67,3 +67,29 @@ variable "aws_region" {
   description = "The AWS region to deploy the ECS service"
   type        = string
 }
+
+# health check configuration of the microservice
+variable "healthCheck" {
+  description = "health check configuration of the microservice"
+  type        = object({                  
+      interval      = number
+      timeout       = number
+      retries       = number
+      startPeriod   = number
+  })
+}
+
+variable "target_group_arn" {
+  description = "Target group arns by port number"
+  type = string
+}
+
+variable "enable_service_connect" {
+  type    = bool
+  default = false
+}
+
+variable "service_connect_namespace" {
+  type    = string
+  default = "default"
+}

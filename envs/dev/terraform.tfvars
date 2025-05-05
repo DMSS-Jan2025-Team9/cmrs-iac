@@ -356,10 +356,23 @@ EOT
   }
 }
 
-cluster_name = "cmrs-ecs-cluster"
+ecs_cluster = {
+  cluster_name = "cmrs-ecs-cluster"
+  cluster_service_connect_defaults = "cmrs-ecs-appsvc"
+  vpc_name = "vpc-cmrs-app-01"
+}
+
 execution_role_name = "ecs-task-execution-role"
 service_role_name   = "ecs-service-role"
 log_retention_in_days = 14
+
+load_balancer_config = {
+  alb_name          = "alb-cmrs-app"
+  subnets           = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
+  security_groups   = ["sgrp-cmrs-app-01"]
+  vpc_name          = "vpc-cmrs-app-01"
+  acm_arn           = "arn:aws:acm:ap-southeast-1:585008058878:certificate/324abf67-a92d-46b2-92c7-4c8b2f213ab4"
+}
 
 microservices = {
   user-management = {
@@ -381,6 +394,14 @@ microservices = {
       max_capacity      = 4
       cpu_target_value  = 75
     }
+    healthCheck = {
+      interval    = 90
+      timeout     = 30
+      retries     = 3
+      startPeriod = 300
+    }
+    enable_service_connect    = true
+    service_connect_namespace = "cmrs-ecs-appsvc"
   },
 
   course-management = {
@@ -402,6 +423,14 @@ microservices = {
       max_capacity      = 3
       cpu_target_value  = 75
     }
+    healthCheck = {
+      interval    = 90
+      timeout     = 30
+      retries     = 3
+      startPeriod = 300
+    }
+    enable_service_connect    = true
+    service_connect_namespace = "cmrs-ecs-appsvc"
   },
 
   course-registration = {
@@ -423,6 +452,14 @@ microservices = {
       max_capacity      = 4
       cpu_target_value  = 75
     }
+    healthCheck = {
+      interval    = 90
+      timeout     = 30
+      retries     = 3
+      startPeriod = 300
+    }
+    enable_service_connect    = true
+    service_connect_namespace = "cmrs-ecs-appsvc"
   },
 
   notification = {
@@ -444,6 +481,14 @@ microservices = {
       max_capacity      = 2
       cpu_target_value  = 75
     }
+    healthCheck = {
+      interval    = 90
+      timeout     = 30
+      retries     = 3
+      startPeriod = 300
+    }
+    enable_service_connect    = true
+    service_connect_namespace = "cmrs-ecs-appsvc"
   },
 
   course-recommendation = {
@@ -465,6 +510,14 @@ microservices = {
       max_capacity      = 2
       cpu_target_value  = 75
     }
+    healthCheck = {
+      interval    = 90
+      timeout     = 30
+      retries     = 3
+      startPeriod = 300
+    }
+    enable_service_connect    = true
+    service_connect_namespace = "cmrs-ecs-appsvc"
   }
 }
 

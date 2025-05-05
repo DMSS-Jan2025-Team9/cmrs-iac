@@ -1,3 +1,7 @@
+output "namespace_arn" {
+  value = aws_service_discovery_private_dns_namespace.ecs_namespace_appsvc.arn
+}
+
 output "ecs_cluster_id" {
   description = "The ID of the ECS cluster"
   value       = aws_ecs_cluster.this.id

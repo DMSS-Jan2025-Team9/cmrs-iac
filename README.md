@@ -64,40 +64,6 @@ terraform init
 terraform plan  -var-file="terraform.tfvars"
 terraform apply -var-file="terraform.tfvars"
 
-├── backend.tf           # Backend configuration file
-├── envs/                # Folder for environment-specific configurations
-│   ├── dev/
-│   │   ├── main.tf      # Dev environment-specific resources and module calls
-│   │   ├── terraform.tfvars  # Variable values for dev environment
-│   │   └── outputs.tf   # Dev-specific outputs
-│   ├── prod/
-│   │   ├── main.tf      # Prod environment-specific resources and module calls
-│   │   ├── terraform.tfvars  # Variable values for prod environment
-│   │   └── outputs.tf   # Prod-specific outputs
-├── modules/             # Reusable Terraform modules (vpc, subnet, sg, etc.)
-│   ├── vpc/
-│   ├── subnet/
-│   └── security_group/
-└── terraform.tfvars     # Optional default variable values
-
-
-# ECR
-1) Navigate to ecr folder
-2) run terraform commands:
-terraform init
-terraform plan  -var-file="dev.tfvars"
-terraform apply -var-file="dev.tfvars"
-
-reference: https://spacelift.io/blog/terraform-ecr
-
-# ECS
-1) Navigate to ecs folder
-2) run terraform commands:
-terraform init
-terraform plan 
-terraform apply -var-file="dev.tfvars"
-reference: https://spacelift.io/blog/terraform-ecs
-
 
 # Frontend CI/CD - using GitHub & AWS S3 + CloudFront
 Setup:
@@ -133,6 +99,14 @@ https://docs.github.com/en/actions/use-cases-and-examples/deploying/deploying-to
     terraform init
     terraform plan  -var-file="terraform.tfvars"
     terraform apply -var-file="terraform.tfvars"
+
+# Self signed certificate generation
+openssl genpkey -algorithm RSA -out cmrs.com.sg.key -pkeyopt rsa_keygen_bits:2048
+openssl req -new -key cmrs.com.sg.key -out cmrs.com.sg.csr -config alb_ssl.conf
+
+openssl x509 -req -in cmrs.com.sg.csr -signkey cmrs.com.sg.key -out cmrs.com.sg.crt -days 365 -extensions req_ext -extfile alb_ssl.conf
+openssl x509 -in cmrs.com.sg.crt -noout -text
+
 
 
 # AWS Credential

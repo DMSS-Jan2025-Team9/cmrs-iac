@@ -96,9 +96,13 @@ variable "repositories" {
   }))
 }
 
-variable "cluster_name" {
-  description = "The name of the ECS cluster"
-  type        = string
+variable "ecs_cluster" {
+  description = "The map of the ECS cluster"
+  type        = object({
+    cluster_name                     = string
+    cluster_service_connect_defaults = string
+    vpc_name                         = string
+  })
 }
 
 variable "execution_role_name" {
@@ -114,6 +118,17 @@ variable "service_role_name" {
 variable "log_retention_in_days" {
   description = "The retention in days for log groups"
   type        = number
+}
+
+variable "load_balancer_config" {
+  description = "Application load balancer configuration for ECS services"
+  type = object({
+    alb_name          = string
+    subnets           = list(string)
+    security_groups   = list(string)
+    vpc_name          = string
+    acm_arn           = optional(string)
+  })
 }
 
 variable "microservices" {
@@ -133,6 +148,14 @@ variable "microservices" {
       max_capacity      = number
       cpu_target_value  = number
     })
+    healthCheck = object({                   # HealthCheck configuration for the microservice
+      interval      = number
+      timeout       = number
+      retries       = number
+      startPeriod   = number
+    })
+    enable_service_connect    = bool
+    service_connect_namespace = optional(string)
   }))
 }
 
