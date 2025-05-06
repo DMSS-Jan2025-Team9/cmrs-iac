@@ -1,95 +1,108 @@
 ---
-- name: System and Docker Cleanup
+- name: Safe System Cleanup for GitHub Actions Runner
   hosts: ec2_hosts
   become: yes
   tasks:
-    
-    # Clean Docker containers that are stopped
-    - name: Prune stopped Docker containers
-      docker_container:
-        name: "{{ item }}"
-        state: absent
-      with_items: "{{ lookup('pipe', 'docker ps -a -q') | splitlines() }}"
-      ignore_errors: yes
-    
-    # Remove unused Docker images
-    - name: Prune unused Docker images
-      command: docker image prune -f
-      ignore_errors: yes
-    
-    # Remove unused Docker volumes
-    - name: Prune unused Docker volumes
-      command: docker volume prune -f
-      ignore_errors: yes
-    
-    # Clean Docker system (containers, images, volumes, networks)
-    - name: Clean up all unused Docker resources
+
+    # Prune unused/stopped Docker resources safely
+    - name: Clean up Docker - containers, images, volumes, networks
       command: docker system prune -a -f
       ignore_errors: yes
 
-    # Clear Docker logs
+    # Clear old Docker logs
     - name: Remove old Docker logs
-      shell: "find /var/lib/docker/containers/ -name *-json.log -exec rm -f {} \\;"
+      shell: "find /var/lib/docker/containers/ -name '*-json.log' -exec truncate -s 0 {} \\;"
       ignore_errors: yes
 
-    # Clean up system logs
+    # Clean up system journal logs older than 3 days
     - name: Vacuum journal logs older than 3 days
       command: journalctl --vacuum-time=3d
       ignore_errors: yes
 
-    # Clean up all apt cache
-    - name: Clean apt cache
+    # Cleanup apt cache and unnecessary dependencies
+    - name: Clean up apt cache and unnecessary packages
       apt:
         autoclean: yes
         autoremove: yes
+        purge: yes
+        update_cache: yes
       ignore_errors: yes
 
-    # Remove unused packages
-    - name: Remove unnecessary packages
-      apt:
-        name: "{{ item }}"
+    # Remove temporary files from /tmp
+    - name: Clean /tmp directory
+      file:
+        path: "{{ item }}"
         state: absent
-      with_items:
-        - "docker-ce"
-        - "docker-ce-cli"
-        - "containerd.io"
+      with_fileglob:
+        - "/tmp/*"
       ignore_errors: yes
 
-    # Clear all files in /tmp (if required)
-    - name: Remove all files in /tmp
+    # Clean up rotated log files in /var/log (not essential logs)
+    - name: Remove rotated log files
+      shell: "find /var/log -type f -name '*.gz' -delete"
+      ignore_errors: yes
+
+    - name: Truncate large log files
+      shell: "find /var/log -type f -name '*.log' -exec truncate -s 0 {} \\;"
+      ignore_errors: yes
+
+
+    - name: Remove GitHub Actions temp files
+      file:
+        path: /opt/actions-runner/_work/_temp
+        state: absent
+      ignore_errors: yes
+
+    - name: Recreate temp folder
+      file:
+        path: /opt/actions-runner/_work/_temp
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    # Clear github runner installation file
+    - name: Remove GitHub Actions runner tarball
+      file:
+        path: /opt/actions-runner/actions-runner.tar.gz
+        state: absent
+      ignore_errors: yes
+
+    # Remove AWS CLI installation zip file
+    - name: Remove AWS CLI zip file
+      file:
+        path: /tmp/awscliv2.zip
+        state: absent
+      ignore_errors: yes
+
+    # Clean up temporary files in /tmp
+    - name: Clean up temp files
       file:
         path: "/tmp/{{ item }}"
         state: absent
       with_fileglob:
         - "/tmp/*"
       ignore_errors: yes
-
-    # Clear log files in /var/log (except for essential logs)
-    - name: Clean up log files in /var/log
-      shell: "find /var/log/ -type f -name '*.log' -exec rm -f {} \\;"
-      ignore_errors: yes
-
-    # Resize filesystem (optional step, depends on the environment)
-    - name: Resize filesystem if required (Example for AWS EC2)
-      command: "resize2fs /dev/xvda1"
-      when: ansible_facts.device_xvda1 is defined
-      ignore_errors: yes
-
-    # Clean up all installed packages except essential ones
-    - name: Get a list of all installed packages
-      command: dpkg --get-selections
-      register: dpkg_output
-
-    - name: Remove all installed packages except essential ones
-      apt:
-        name: "{{ item }}"
-        state: absent
-      with_items: "{{ dpkg_output.stdout_lines }}"
-      when: "'apt' not in item and 'dpkg' not in item and 'systemd' not in item and 'sudo' not in item and 'bash' not in item and 'coreutils' not in item and 'libc6' not in item"
-      ignore_errors: yes
       
-    - name: Clean apt cache
+    - name: Truncate all Docker container logs
       become: true
-      apt:
-        autoclean: yes
-        autoremove: yes
+      shell: find /var/lib/docker/containers/ -name "*-json.log" -exec truncate -s 0 {} \;
+      args:
+        warn: false
+      ignore_errors: yes
+
+    # Restart the GitHub Action runners
+    - name: Start GitHub Actions runner service
+      become: true
+      command: ./svc.sh stop
+      args:
+        chdir: /opt/actions-runner
+      ignore_errors: yes
+
+    # Restart the GitHub Action runners
+    - name: Start GitHub Actions runner service
+      become: true
+      command: ./svc.sh start
+      args:
+        chdir: /opt/actions-runner
+      ignore_errors: yes

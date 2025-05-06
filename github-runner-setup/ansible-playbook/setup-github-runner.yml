@@ -4,7 +4,7 @@
   vars:
     docker_user: ubuntu
     github_repo: https://github.com/DMSS-Jan2025-Team9
-    github_token: AEZQDYKRGWEL5WGG32CXUHDIDBRIG
+    github_token: AEZQDYOGZH4SJQLBSVVISBDIDEHVU
     github_runner_group: "cmrs-runner-group"
 
   tasks:
@@ -23,27 +23,43 @@
           - openjdk-17-jdk
           - maven
           - mysql-client
+          - ansible-core
         update_cache: yes
     
-    - name: Add NodeSource APT repo for Node.js 18
+    - name: Add NodeSource APT repo for Node.js 20
       become: true
       apt_key:
         url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
         state: present
 
-    - name: Add Node.js 18 repo
+    - name: Add Node.js 20 repo
       become: true
       apt_repository:
-        repo: "deb https://deb.nodesource.com/node_18.x {{ ansible_distribution_release }} main"
+        repo: "deb https://deb.nodesource.com/node_20.x {{ ansible_distribution_release }} main"
         state: present
         filename: nodesource
 
-    - name: Install Node.js 18 and npm
+    - name: Install Node.js 20 and npm
       become: true
       apt:
         name:
           - nodejs
         update_cache: yes
+    
+    - name: Install TypeScript globally
+      become: true
+      npm:
+        name: typescript
+        global: yes
+
+    - name: Verify TypeScript installation
+      become: true
+      command: tsc --version
+      register: tsc_version
+
+    - name: Show TypeScript version
+      debug:
+        msg: "TypeScript version: {{ tsc_version.stdout }}"
 
     - name: Download AWS CLI zip
       become: true
@@ -119,6 +135,12 @@
         groups: docker
         append: yes
 
+    - name: Check if the GitHub runner service is already running
+      stat:
+        path: /opt/actions-runner/svc.status
+      register: svc_status
+
+
     - name: Configure GitHub runner
       become: true
       become_user: ubuntu
@@ -136,15 +158,36 @@
         - github_repo is defined
         - github_token is defined
         - github_runner_group is defined
+        - svc_status.stat.exists == false
+        - svc_status.stat.size == 0
 
     - name: Install GitHub Actions runner as a service
       become: true
       command: ./svc.sh install
       args:
         chdir: /opt/actions-runner
+      when:
+        - svc_status.stat.exists == false
+        - svc_status.stat.size == 0
 
     - name: Start GitHub Actions runner service
       become: true
       command: ./svc.sh start
       args:
         chdir: /opt/actions-runner
+
+    # Clear github runner installation file
+    - name: Remove GitHub Actions runner tarball
+      become: true
+      file:
+        path: /opt/actions-runner/actions-runner.tar.gz
+        state: absent
+      ignore_errors: yes
+
+    # Remove AWS CLI installation zip file
+    - name: Remove AWS CLI zip file
+      become: true
+      file:
+        path: /tmp/awscliv2.zip
+        state: absent
+      ignore_errors: yes

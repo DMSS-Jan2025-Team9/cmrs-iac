@@ -1,0 +1,20 @@
+---
+- name: Restart GitHub Self-Hosted Runner
+  hosts: github_runner
+  vars:
+    docker_user: ubuntu
+
+  tasks:
+    # Restart the GitHub Action runners
+    - name: Start GitHub Actions runner service
+      become: true
+      command: ./svc.sh stop
+      args:
+        chdir: /opt/actions-runner
+
+    # Restart the GitHub Action runners
+    - name: Start GitHub Actions runner service
+      become: true
+      command: ./svc.sh start
+      args:
+        chdir: /opt/actions-runner
