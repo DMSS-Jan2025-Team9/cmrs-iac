@@ -24,8 +24,8 @@ resource "aws_lb_target_group" "target_groups" {
     port                = "traffic-port"
     healthy_threshold   = 3
     unhealthy_threshold = 3
-    timeout             = 30
-    interval            = 60
+    timeout             = 60
+    interval            = 300
   }
 }
 

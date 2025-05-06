@@ -395,8 +395,8 @@ microservices = {
       cpu_target_value  = 75
     }
     healthCheck = {
-      interval    = 90
-      timeout     = 30
+      interval    = 300
+      timeout     = 60
       retries     = 3
       startPeriod = 300
     }
@@ -424,8 +424,8 @@ microservices = {
       cpu_target_value  = 75
     }
     healthCheck = {
-      interval    = 90
-      timeout     = 30
+      interval    = 300
+      timeout     = 60
       retries     = 3
       startPeriod = 300
     }
@@ -453,8 +453,8 @@ microservices = {
       cpu_target_value  = 75
     }
     healthCheck = {
-      interval    = 90
-      timeout     = 30
+      interval    = 300
+      timeout     = 60
       retries     = 3
       startPeriod = 300
     }
@@ -482,8 +482,8 @@ microservices = {
       cpu_target_value  = 75
     }
     healthCheck = {
-      interval    = 90
-      timeout     = 30
+      interval    = 300
+      timeout     = 60
       retries     = 3
       startPeriod = 300
     }
@@ -511,8 +511,8 @@ microservices = {
       cpu_target_value  = 75
     }
     healthCheck = {
-      interval    = 90
-      timeout     = 30
+      interval    = 300
+      timeout     = 60
       retries     = 3
       startPeriod = 300
     }
