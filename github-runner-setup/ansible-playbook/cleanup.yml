@@ -23,10 +23,15 @@
       command: journalctl --vacuum-time=1d
       ignore_errors: yes
 
+    - name: Perform apt autoremove with purge
+      apt:
+        autoremove: yes
+        purge: yes
+      ignore_errors: yes
+
     - name: Clean apt cache and remove unused packages
       apt:
         autoclean: yes
-        autoremove: yes
         update_cache: yes
       ignore_errors: yes
 
