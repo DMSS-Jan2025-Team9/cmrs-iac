@@ -42,7 +42,7 @@ terraform apply
 Notes: all the terraform state can be found from AWS S3 bucket
 https://ap-southeast-1.console.aws.amazon.com/s3/buckets/cmrs-terraform-state?region=ap-southeast-1&bucketType=general&tab=objects
 
-# RDS creation
+# RDS creation (Already refactor to the terraform modules)
 1) Navigate to rds folder
 2) run terraform commands:
 terraform init
