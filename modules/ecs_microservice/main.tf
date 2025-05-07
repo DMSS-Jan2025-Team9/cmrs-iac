@@ -40,9 +40,10 @@ resource "aws_ecs_task_definition" "this" {
 resource "aws_ecs_service" "this" {
   name            = var.service_name
   cluster         = var.ecs_cluster_id
-  task_definition = aws_ecs_task_definition.this.arn
+  task_definition = var.task_definition_arn == null ? aws_ecs_task_definition.this.arn : var.task_definition_arn
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
+  enable_ecs_managed_tags = true
 
   network_configuration {
     subnets         = var.subnets

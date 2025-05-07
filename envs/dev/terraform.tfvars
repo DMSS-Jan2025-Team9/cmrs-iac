@@ -371,7 +371,7 @@ load_balancer_config = {
   subnets             = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
   security_groups     = ["sgrp-cmrs-app-01"]
   vpc_name            = "vpc-cmrs-app-01"
-  acm_certificate_arn = "arn:aws:acm:ap-southeast-1:585008058878:certificate/324abf67-a92d-46b2-92c7-4c8b2f213ab4"
+  acm_certificate_arn = "arn:aws:acm:ap-southeast-1:585008058878:certificate/16acefba-a04c-47a9-ab89-4f76a4c811a9"
 }
 
 microservices = {
@@ -402,6 +402,7 @@ microservices = {
     }
     enable_service_connect    = true
     service_connect_namespace = "cmrs-ecs-appsvc"
+    task_definition_arn = "arn:aws:ecs:ap-southeast-1:585008058878:task-definition/user-management:32"
   },
 
   course-management = {
@@ -431,6 +432,7 @@ microservices = {
     }
     enable_service_connect    = true
     service_connect_namespace = "cmrs-ecs-appsvc"
+    task_definition_arn = "arn:aws:ecs:ap-southeast-1:585008058878:task-definition/course-management:32"
   },
 
   course-registration = {
@@ -460,6 +462,7 @@ microservices = {
     }
     enable_service_connect    = true
     service_connect_namespace = "cmrs-ecs-appsvc"
+    task_definition_arn = "arn:aws:ecs:ap-southeast-1:585008058878:task-definition/course-registration:34"
   },
 
   notification = {
@@ -489,6 +492,7 @@ microservices = {
     }
     enable_service_connect    = true
     service_connect_namespace = "cmrs-ecs-appsvc"
+    task_definition_arn = "arn:aws:ecs:ap-southeast-1:585008058878:task-definition/notification:35"
   },
 
   course-recommendation = {
@@ -518,6 +522,7 @@ microservices = {
     }
     enable_service_connect    = true
     service_connect_namespace = "cmrs-ecs-appsvc"
+    task_definition_arn = "arn:aws:ecs:ap-southeast-1:585008058878:task-definition/course-recommendation:33"
   }
 }
 

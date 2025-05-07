@@ -101,6 +101,7 @@ module "microservices" {
   enable_service_connect    = each.value.enable_service_connect
   service_connect_namespace = each.value.service_connect_namespace
   target_group_arn          = module.load_balancer.target_group_arns[each.key]
+  task_definition_arn       = each.value.task_definition_arn
 }
 
 module "ecs_autoscaling" {

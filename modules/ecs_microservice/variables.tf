@@ -79,6 +79,12 @@ variable "healthCheck" {
   })
 }
 
+variable "task_definition_arn" {
+  description = "Task definition ARN for the latest deployment if to skip deployment"
+  type = string
+  default = "null"
+}
+
 variable "target_group_arn" {
   description = "Target group arns by port number"
   type = string

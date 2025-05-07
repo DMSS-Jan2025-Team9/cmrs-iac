@@ -156,6 +156,7 @@ variable "microservices" {
     })
     enable_service_connect    = bool
     service_connect_namespace = optional(string)
+    task_definition_arn       = optional(string)
   }))
 }
 
