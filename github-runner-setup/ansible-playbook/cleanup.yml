@@ -4,31 +4,32 @@
   become: yes
   tasks:
 
-    # Prune unused/stopped Docker resources safely
-    - name: Clean up Docker - containers, images, volumes, networks
-      command: docker system prune -a -f
+    - name: Check disk usage before cleanup
+      command: df -h
+      register: disk_usage_before
+
+    - debug:
+        var: disk_usage_before.stdout_lines
+
+    - name: Prune Docker resources
+      command: docker system prune -a -f --volumes
       ignore_errors: yes
 
-    # Clear old Docker logs
-    - name: Remove old Docker logs
-      shell: "find /var/lib/docker/containers/ -name '*-json.log' -exec truncate -s 0 {} \\;"
+    - name: Truncate all Docker container logs
+      shell: find /var/lib/docker/containers/ -name "*-json.log" -exec truncate -s 0 {} \;
       ignore_errors: yes
 
-    # Clean up system journal logs older than 3 days
-    - name: Vacuum journal logs older than 3 days
-      command: journalctl --vacuum-time=3d
+    - name: Vacuum journal logs older than 1 days
+      command: journalctl --vacuum-time=1d
       ignore_errors: yes
 
-    # Cleanup apt cache and unnecessary dependencies
-    - name: Clean up apt cache and unnecessary packages
+    - name: Clean apt cache and remove unused packages
       apt:
         autoclean: yes
         autoremove: yes
-        purge: yes
         update_cache: yes
       ignore_errors: yes
 
-    # Remove temporary files from /tmp
     - name: Clean /tmp directory
       file:
         path: "{{ item }}"
@@ -37,23 +38,23 @@
         - "/tmp/*"
       ignore_errors: yes
 
-    # Clean up rotated log files in /var/log (not essential logs)
-    - name: Remove rotated log files
-      shell: "find /var/log -type f -name '*.gz' -delete"
+    - name: Remove rotated and large logs
+      shell: |
+        find /var/log -type f -name '*.gz' -delete
+        find /var/log -type f -name '*.log' -exec truncate -s 0 {} \;
       ignore_errors: yes
 
-    - name: Truncate large log files
-      shell: "find /var/log -type f -name '*.log' -exec truncate -s 0 {} \\;"
-      ignore_errors: yes
-
-
-    - name: Remove GitHub Actions temp files
+    - name: Remove temp files and unused archives
       file:
-        path: /opt/actions-runner/_work/_temp
+        path: "{{ item }}"
         state: absent
+      with_items:
+        - /opt/actions-runner/_work/_temp
+        - /opt/actions-runner/actions-runner.tar.gz
+        - /tmp/awscliv2.zip
       ignore_errors: yes
 
-    - name: Recreate temp folder
+    - name: Recreate temp directory
       file:
         path: /opt/actions-runner/_work/_temp
         state: directory
@@ -61,48 +62,21 @@
         group: ubuntu
         mode: '0755'
 
-    # Clear github runner installation file
-    - name: Remove GitHub Actions runner tarball
-      file:
-        path: /opt/actions-runner/actions-runner.tar.gz
-        state: absent
-      ignore_errors: yes
-
-    # Remove AWS CLI installation zip file
-    - name: Remove AWS CLI zip file
-      file:
-        path: /tmp/awscliv2.zip
-        state: absent
-      ignore_errors: yes
-
-    # Clean up temporary files in /tmp
-    - name: Clean up temp files
-      file:
-        path: "/tmp/{{ item }}"
-        state: absent
-      with_fileglob:
-        - "/tmp/*"
-      ignore_errors: yes
-      
-    - name: Truncate all Docker container logs
-      become: true
-      shell: find /var/lib/docker/containers/ -name "*-json.log" -exec truncate -s 0 {} \;
-      args:
-        warn: false
-      ignore_errors: yes
-
-    # Restart the GitHub Action runners
-    - name: Start GitHub Actions runner service
-      become: true
+    - name: Restart GitHub Actions runner
       command: ./svc.sh stop
       args:
         chdir: /opt/actions-runner
       ignore_errors: yes
 
-    # Restart the GitHub Action runners
-    - name: Start GitHub Actions runner service
-      become: true
+    - name: Start GitHub Actions runner
       command: ./svc.sh start
       args:
         chdir: /opt/actions-runner
       ignore_errors: yes
+
+    - name: Check disk usage after cleanup
+      command: df -h
+      register: disk_usage_after
+
+    - debug:
+        var: disk_usage_after.stdout_lines
