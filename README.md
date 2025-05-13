@@ -8,14 +8,13 @@ https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 
 - https://developer.hashicorp.com/terraform/install
 
-
 2) Guide for IAC - RDS: https://awstip.com/infrastructure-as-code-iac-terraform-aws-e87cd76d27e5
 
 # First time configure AWS credential in your PC
 run below commands:
 aws configure
-export AWS_ACCESS_KEY_ID=AKIAYQNJSSH7J5JIHHQZ
-export AWS_SECRET_ACCESS_KEY=O/0zs87m1c8I/y65m7WQQ60uvg4MA5MAyuJZifNo
+export AWS_ACCESS_KEY_ID=<ACCESS KEY ID>
+export AWS_SECRET_ACCESS_KEY=<ACCESS KEY>
 export AWS_DEFAULT_REGION=ap-southeast-1
 
 # First time installation
@@ -100,31 +99,8 @@ https://docs.github.com/en/actions/use-cases-and-examples/deploying/deploying-to
     terraform plan  -var-file="terraform.tfvars"
     terraform apply -var-file="terraform.tfvars"
 
-# Self signed certificate generation
-openssl genpkey -algorithm RSA -out cmrs.com.sg.key -pkeyopt rsa_keygen_bits:2048
-openssl req -new -key cmrs.com.sg.key -out cmrs.com.sg.csr -config alb_ssl.conf
-
-openssl x509 -req -in cmrs.com.sg.csr -signkey cmrs.com.sg.key -out cmrs.com.sg.crt -days 365 -extensions req_ext -extfile alb_ssl.conf
-openssl x509 -in cmrs.com.sg.crt -noout -text
-
 
 
 # AWS Credential
 DEFAULT_ACCOUNT=585008058878
-
 Console sign-in URL: https://585008058878.signin.aws.amazon.com/console
-User name: u-admin
-Console password: MbYZ@2)9
-export AWS_ACCESS_KEY_ID=AKIAYQNJSSH7DTALL5UJ
-export AWS_SECRET_ACCESS_KEY=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
-
-Console sign-in URL: https://585008058878.signin.aws.amazon.com/console
-User name: u-iac
-Console password: i@V5^s3F
-export AWS_ACCESS_KEY_ID=AKIAYQNJSSH7PPJDCNA5
-export AWS_SECRET_ACCESS_KEY=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
-
-u-IAC - RUN AWS configure and input the access key and secret key
-ACCESS KEY = AKIAYQNJSSH7J5JIHHQZ
-Secret key = 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
-default region = ap-southeast-1
