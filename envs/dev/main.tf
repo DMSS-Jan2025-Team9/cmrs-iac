@@ -36,7 +36,10 @@ module "ecr" {
 }
 module "ecs_cluster" {
   source      = "../../modules/ecs_cluster"
-  cluster_name = var.cluster_name
+  cluster_name = var.ecs_cluster.cluster_name
+  vpc_name = var.ecs_cluster.vpc_name
+  cluster_service_connect_defaults = var.ecs_cluster.cluster_service_connect_defaults
+  vpc_ids_map               = module.vpc.vpc_ids_map  # Pass the vpc_ids_map from the VPC module
 }
 
 module "iam_role" {
@@ -56,6 +59,25 @@ module "log_groups" {
   tags = each.value.tags
 }
 
+module "load_balancer" {
+  source = "../../modules/load_balancer"
+
+  load_balancer_config   = var.load_balancer_config
+  
+  vpc_ids_map            = module.vpc.vpc_ids_map
+  subnet_ids_map         = module.subnet.subnet_ids_map
+  security_group_ids_map = module.security_group.security_group_ids_map
+
+  ecs_services = [
+    for name, svc in var.microservices : {
+      name              = name
+      port              = svc.container_port
+      path_prefix       = "/${name}/*"
+      health_check_path = "/${name}/actuator/health"
+    }
+  ]
+}
+
 module "microservices" {
   source = "../../modules/ecs_microservice"
 
@@ -73,7 +95,13 @@ module "microservices" {
   execution_role_arn = module.iam_role.ecs_task_execution_role_arn
   ecs_cluster_id     = module.ecs_cluster.ecs_cluster_id
   log_group_name     = module.log_groups[each.key].log_group_name
-  aws_region = var.aws_region
+  aws_region         = var.aws_region
+
+  healthCheck               = each.value.healthCheck
+  enable_service_connect    = each.value.enable_service_connect
+  service_connect_namespace = each.value.service_connect_namespace
+  target_group_arn          = module.load_balancer.target_group_arns[each.key]
+  task_definition_arn       = each.value.task_definition_arn
 }
 
 module "ecs_autoscaling" {
@@ -105,4 +133,20 @@ module "rds" {
   db_subnet_group_name  = var.rds_config.db_subnet_group_name
   multi_az              = var.rds_config.multi_az
   subnet_ids            = [for subnet_name in var.rds_config.subnets_names : module.subnet.subnet_ids_map[subnet_name]] 
+}
+
+module "rabbitmq" {
+  source = "../../modules/rabbitmq"
+  rabbitmq_config = var.rabbitmq_config
+
+  subnet_ids_map = module.subnet.subnet_ids_map
+  security_group_ids_map = module.security_group.security_group_ids_map
+}
+
+module "ec2_instances" {
+  source           = "../../modules/ec2"
+  ec2_instances    = var.ec2_instances
+
+  subnet_ids_map = module.subnet.subnet_ids_map
+  security_group_ids_map = module.security_group.security_group_ids_map
 }

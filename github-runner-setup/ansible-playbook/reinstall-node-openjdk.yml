@@ -1,0 +1,83 @@
+---
+- name: Reinstall Node.js 20 and ensure only OpenJDK 17 is installed
+  hosts: github_runner
+  become: true
+
+  tasks:
+    - name: Check if Node.js is installed
+      command: node -v
+      register: node_version
+      ignore_errors: yes
+
+    - name: Remove existing Node.js and npm (if not version 20)
+      apt:
+        name:
+          - nodejs
+          - npm
+        state: absent
+      when: node_version.stdout is not defined or node_version.stdout is not search('v20')
+
+    - name: Add NodeSource GPG key
+      apt_key:
+        url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+        state: present
+
+    - name: Add Node.js 20 APT repo
+      apt_repository:
+        repo: "deb https://deb.nodesource.com/node_20.x {{ ansible_distribution_release | lower }} main"
+        state: present
+        filename: nodesource
+
+    - name: Install Node.js 20
+      apt:
+        name: nodejs
+        update_cache: yes
+        state: present
+
+    - name: Verify installed Node.js version
+      command: node -v
+      register: verified_node
+      changed_when: false
+
+    - name: Show installed Node.js version
+      debug:
+        var: verified_node.stdout
+
+    - name: Check if Java is installed
+      command: which java
+      register: java_check
+      ignore_errors: yes
+
+    - name: Get Java version (if installed)
+      command: java -version
+      register: java_version
+      when: java_check.rc == 0
+      ignore_errors: yes
+
+    - name: Remove all OpenJDK versions except 17
+      apt:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - openjdk-8-jdk
+        - openjdk-11-jdk
+        - openjdk-13-jdk
+        - openjdk-16-jdk
+        - openjdk-18-jdk
+        - openjdk-21-jdk
+      when: java_version.stdout is not defined or java_version.stdout is not search('openjdk version "17"')
+
+    - name: Ensure OpenJDK 17 is installed
+      apt:
+        name: openjdk-17-jdk
+        state: present
+
+    - name: Verify Java version
+      command: java -version
+      register: verified_java
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Show installed Java version
+      debug:
+        var: verified_java.stderr_lines

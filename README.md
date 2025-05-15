@@ -8,14 +8,13 @@ https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 
 - https://developer.hashicorp.com/terraform/install
 
-
 2) Guide for IAC - RDS: https://awstip.com/infrastructure-as-code-iac-terraform-aws-e87cd76d27e5
 
 # First time configure AWS credential in your PC
 run below commands:
 aws configure
-export AWS_ACCESS_KEY_ID=AKIAYQNJSSH7J5JIHHQZ
-export AWS_SECRET_ACCESS_KEY=O/0zs87m1c8I/y65m7WQQ60uvg4MA5MAyuJZifNo
+export AWS_ACCESS_KEY_ID=<ACCESS KEY ID>
+export AWS_SECRET_ACCESS_KEY=<ACCESS KEY>
 export AWS_DEFAULT_REGION=ap-southeast-1
 
 # First time installation
@@ -42,7 +41,7 @@ terraform apply
 Notes: all the terraform state can be found from AWS S3 bucket
 https://ap-southeast-1.console.aws.amazon.com/s3/buckets/cmrs-terraform-state?region=ap-southeast-1&bucketType=general&tab=objects
 
-# RDS creation
+# RDS creation (Already refactor to the terraform modules)
 1) Navigate to rds folder
 2) run terraform commands:
 terraform init
@@ -63,40 +62,6 @@ terraform apply -var-file="dev.tfvars"
 terraform init
 terraform plan  -var-file="terraform.tfvars"
 terraform apply -var-file="terraform.tfvars"
-
-├── backend.tf           # Backend configuration file
-├── envs/                # Folder for environment-specific configurations
-│   ├── dev/
-│   │   ├── main.tf      # Dev environment-specific resources and module calls
-│   │   ├── terraform.tfvars  # Variable values for dev environment
-│   │   └── outputs.tf   # Dev-specific outputs
-│   ├── prod/
-│   │   ├── main.tf      # Prod environment-specific resources and module calls
-│   │   ├── terraform.tfvars  # Variable values for prod environment
-│   │   └── outputs.tf   # Prod-specific outputs
-├── modules/             # Reusable Terraform modules (vpc, subnet, sg, etc.)
-│   ├── vpc/
-│   ├── subnet/
-│   └── security_group/
-└── terraform.tfvars     # Optional default variable values
-
-
-# ECR
-1) Navigate to ecr folder
-2) run terraform commands:
-terraform init
-terraform plan  -var-file="dev.tfvars"
-terraform apply -var-file="dev.tfvars"
-
-reference: https://spacelift.io/blog/terraform-ecr
-
-# ECS
-1) Navigate to ecs folder
-2) run terraform commands:
-terraform init
-terraform plan 
-terraform apply -var-file="dev.tfvars"
-reference: https://spacelift.io/blog/terraform-ecs
 
 
 # Frontend CI/CD - using GitHub & AWS S3 + CloudFront
@@ -135,22 +100,7 @@ https://docs.github.com/en/actions/use-cases-and-examples/deploying/deploying-to
     terraform apply -var-file="terraform.tfvars"
 
 
+
 # AWS Credential
 DEFAULT_ACCOUNT=585008058878
-
 Console sign-in URL: https://585008058878.signin.aws.amazon.com/console
-User name: u-admin
-Console password: MbYZ@2)9
-export AWS_ACCESS_KEY_ID=AKIAYQNJSSH7DTALL5UJ
-export AWS_SECRET_ACCESS_KEY=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
-
-Console sign-in URL: https://585008058878.signin.aws.amazon.com/console
-User name: u-iac
-Console password: i@V5^s3F
-export AWS_ACCESS_KEY_ID=AKIAYQNJSSH7PPJDCNA5
-export AWS_SECRET_ACCESS_KEY=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
-
-u-IAC - RUN AWS configure and input the access key and secret key
-ACCESS KEY = AKIAYQNJSSH7J5JIHHQZ
-Secret key = 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
-default region = ap-southeast-1

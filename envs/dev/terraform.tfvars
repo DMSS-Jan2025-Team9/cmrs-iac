@@ -137,6 +137,74 @@ security_group_parameters = {
         description = "Allow all egress"
       }
     ]
+  },
+  sgrp-cmrs-rabbitmq = {
+    name                   = "sgrp-cmrs-rabbitmq"
+    description            = "Security group of CMRS RabbitMQ"
+    revoke_rules_on_delete = true
+    vpc_name = "vpc-cmrs-app-01"
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Name"        = "sgrp-cmrs-rabbitmq"
+    }
+    ingress = [
+      {
+        from_port   = 5671
+        to_port     = 5671
+        protocol    = "tcp"
+        self        = false
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow ingress to database"
+      }
+    ]
+    egress = [
+      {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow all egress"
+      }
+    ]
+  },
+  sgrp-cmrs-ec2 = {
+    name                   = "sgrp-cmrs-ec2"
+    description            = "Security group of CMRS EC2 instance"
+    revoke_rules_on_delete = true
+    vpc_name = "vpc-cmrs-app-01"
+    tags = {
+      "Environment" = "dev"
+      "Project"     = "CMRS"
+      "Name"        = "sgrp-cmrs-ec2"
+    }
+    ingress = [
+      {
+        from_port   = 22
+        to_port     = 22
+        protocol    = "tcp"
+        self        = false
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow ingress to database"
+      },
+      {
+        from_port   = 3389
+        to_port     = 3389
+        protocol    = "tcp"
+        self        = false
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow ingress to database"
+      }
+    ]
+    egress = [
+      {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow all egress"
+      }
+    ]
   }
 }
 
@@ -288,10 +356,23 @@ EOT
   }
 }
 
-cluster_name = "cmrs-ecs-cluster"
+ecs_cluster = {
+  cluster_name = "cmrs-ecs-cluster"
+  cluster_service_connect_defaults = "cmrs-ecs-appsvc"
+  vpc_name = "vpc-cmrs-app-01"
+}
+
 execution_role_name = "ecs-task-execution-role"
 service_role_name   = "ecs-service-role"
 log_retention_in_days = 14
+
+load_balancer_config = {
+  alb_name            = "alb-cmrs-app"
+  subnets             = ["subnet-cmrs-app-01", "subnet-cmrs-app-02"]
+  security_groups     = ["sgrp-cmrs-app-01"]
+  vpc_name            = "vpc-cmrs-app-01"
+  acm_certificate_arn = "arn:aws:acm:ap-southeast-1:585008058878:certificate/16acefba-a04c-47a9-ab89-4f76a4c811a9"
+}
 
 microservices = {
   user-management = {
@@ -313,6 +394,15 @@ microservices = {
       max_capacity      = 4
       cpu_target_value  = 75
     }
+    healthCheck = {
+      interval    = 300
+      timeout     = 60
+      retries     = 3
+      startPeriod = 300
+    }
+    enable_service_connect    = true
+    service_connect_namespace = "cmrs-ecs-appsvc"
+    task_definition_arn = "arn:aws:ecs:ap-southeast-1:585008058878:task-definition/user-management:32"
   },
 
   course-management = {
@@ -334,6 +424,15 @@ microservices = {
       max_capacity      = 3
       cpu_target_value  = 75
     }
+    healthCheck = {
+      interval    = 300
+      timeout     = 60
+      retries     = 3
+      startPeriod = 300
+    }
+    enable_service_connect    = true
+    service_connect_namespace = "cmrs-ecs-appsvc"
+    task_definition_arn = "arn:aws:ecs:ap-southeast-1:585008058878:task-definition/course-management:32"
   },
 
   course-registration = {
@@ -355,6 +454,15 @@ microservices = {
       max_capacity      = 4
       cpu_target_value  = 75
     }
+    healthCheck = {
+      interval    = 300
+      timeout     = 60
+      retries     = 3
+      startPeriod = 300
+    }
+    enable_service_connect    = true
+    service_connect_namespace = "cmrs-ecs-appsvc"
+    task_definition_arn = "arn:aws:ecs:ap-southeast-1:585008058878:task-definition/course-registration:34"
   },
 
   notification = {
@@ -376,6 +484,15 @@ microservices = {
       max_capacity      = 2
       cpu_target_value  = 75
     }
+    healthCheck = {
+      interval    = 300
+      timeout     = 60
+      retries     = 3
+      startPeriod = 300
+    }
+    enable_service_connect    = true
+    service_connect_namespace = "cmrs-ecs-appsvc"
+    task_definition_arn = "arn:aws:ecs:ap-southeast-1:585008058878:task-definition/notification:35"
   },
 
   course-recommendation = {
@@ -397,6 +514,15 @@ microservices = {
       max_capacity      = 2
       cpu_target_value  = 75
     }
+    healthCheck = {
+      interval    = 300
+      timeout     = 60
+      retries     = 3
+      startPeriod = 300
+    }
+    enable_service_connect    = true
+    service_connect_namespace = "cmrs-ecs-appsvc"
+    task_definition_arn = "arn:aws:ecs:ap-southeast-1:585008058878:task-definition/course-recommendation:33"
   }
 }
 
@@ -417,3 +543,44 @@ rds_config = {
   security_group_name   = "sgrp-cmrs-rds-01"
   subnets_names         = ["subnet-cmrs-app-01","subnet-cmrs-app-02"]
 }
+
+rabbitmq_config = {
+  broker_name         = "rabbitmq-broker"
+  engine_version      = "3.13"
+  host_instance_type  = "mq.t3.micro"
+  deployment_mode     = "SINGLE_INSTANCE"
+  subnets          = ["subnet-cmrs-app-01"]
+  publicly_accessible = false
+  security_groups = ["sgrp-cmrs-rabbitmq"]
+  username            = "rabbit_admin"
+  password            = "cmrsRabbitP@55w0rd"
+  configuration_data  = <<-EOT
+    consumer_timeout = 1800000
+  EOT
+  maintenance_window = {
+    day      = "MONDAY"
+    time     = "18:00"
+    timezone = "UTC"
+  }
+}
+
+ec2_instances = [
+  {
+    instance_name     = "cmrs-github-runner-01"
+    ami_id            = "ami-0c1907b6d738188e5" 
+    instance_type     = "t2.micro"
+    key_name          = "ssh-cmrs-ops-console"
+    subnet_name       = "subnet-cmrs-app-01"
+    security_groups   = ["sgrp-cmrs-ec2"]
+    availability_zone = "ap-southeast-1a"
+  },
+  {
+    instance_name     = "cmrs-github-runner-02"
+    ami_id            = "ami-0c1907b6d738188e5" 
+    instance_type     = "t2.micro"
+    key_name          = "ssh-cmrs-ops-console"
+    subnet_name       = "subnet-cmrs-app-02"
+    security_groups   = ["sgrp-cmrs-ec2"]
+    availability_zone = "ap-southeast-1b"
+  }
+]

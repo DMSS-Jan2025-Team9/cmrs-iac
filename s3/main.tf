@@ -87,6 +87,8 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
   
   resource "aws_cloudfront_distribution" "website_cdn" {
     enabled = true
+
+    aliases = var.cloudfront_cdn_aliases
     
     origin {
       domain_name              = aws_s3_bucket.deployment_bucket.bucket_regional_domain_name
@@ -100,18 +102,14 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
       allowed_methods        = ["GET", "HEAD", "DELETE", "OPTIONS", "PATCH", "POST", "PUT"]
       cached_methods         = ["GET", "HEAD"]
       min_ttl                = "0"
-      default_ttl            = "300"
-      max_ttl                = "1200"
+      default_ttl            = "0"
+      max_ttl                = "0"
       target_origin_id       = "origin-bucket-${aws_s3_bucket.deployment_bucket.id}"
       viewer_protocol_policy = "redirect-to-https"
       compress               = true
-
-      forwarded_values {
-        query_string = false
-        cookies {
-          forward = "none"
-        }
-      }
+      cache_policy_id        = var.cache_policy_id
+      origin_request_policy_id = var.origin_request_policy_id
+      response_headers_policy_id = var.response_headers_policy_id
     }
 
     restrictions {
@@ -128,7 +126,10 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
     }
 
     viewer_certificate {
-      cloudfront_default_certificate = true
+      cloudfront_default_certificate = false
+      acm_certificate_arn            = var.cloudfront_cert_arn
+      minimum_protocol_version       = var.cloudfront_min_protocol
+      ssl_support_method             = var.cloudfront_ssl_supports
     }
 
     tags = {

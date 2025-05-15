@@ -1,0 +1,87 @@
+---
+- name: Safe System Cleanup for GitHub Actions Runner
+  hosts: ec2_hosts
+  become: yes
+  tasks:
+
+    - name: Check disk usage before cleanup
+      command: df -h
+      register: disk_usage_before
+
+    - debug:
+        var: disk_usage_before.stdout_lines
+
+    - name: Prune Docker resources
+      command: docker system prune -a -f --volumes
+      ignore_errors: yes
+
+    - name: Truncate all Docker container logs
+      shell: find /var/lib/docker/containers/ -name "*-json.log" -exec truncate -s 0 {} \;
+      ignore_errors: yes
+
+    - name: Vacuum journal logs older than 1 days
+      command: journalctl --vacuum-time=1d
+      ignore_errors: yes
+
+    - name: Perform apt autoremove with purge
+      apt:
+        autoremove: yes
+        purge: yes
+      ignore_errors: yes
+
+    - name: Clean apt cache and remove unused packages
+      apt:
+        autoclean: yes
+        update_cache: yes
+      ignore_errors: yes
+
+    - name: Clean /tmp directory
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_fileglob:
+        - "/tmp/*"
+      ignore_errors: yes
+
+    - name: Remove rotated and large logs
+      shell: |
+        find /var/log -type f -name '*.gz' -delete
+        find /var/log -type f -name '*.log' -exec truncate -s 0 {} \;
+      ignore_errors: yes
+
+    - name: Remove temp files and unused archives
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /opt/actions-runner/_work/_temp
+        - /opt/actions-runner/actions-runner.tar.gz
+        - /tmp/awscliv2.zip
+      ignore_errors: yes
+
+    - name: Recreate temp directory
+      file:
+        path: /opt/actions-runner/_work/_temp
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Restart GitHub Actions runner
+      command: ./svc.sh stop
+      args:
+        chdir: /opt/actions-runner
+      ignore_errors: yes
+
+    - name: Start GitHub Actions runner
+      command: ./svc.sh start
+      args:
+        chdir: /opt/actions-runner
+      ignore_errors: yes
+
+    - name: Check disk usage after cleanup
+      command: df -h
+      register: disk_usage_after
+
+    - debug:
+        var: disk_usage_after.stdout_lines

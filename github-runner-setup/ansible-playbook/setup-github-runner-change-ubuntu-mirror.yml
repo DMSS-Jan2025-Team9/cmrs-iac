@@ -1,0 +1,254 @@
+---
+- name: Setup GitHub Self-Hosted Runner
+  hosts: github_runner
+  vars:
+    docker_user: ubuntu
+    github_repo: https://github.com/DMSS-Jan2025-Team9
+    github_token: AEZQDYNQCSRYBDSBIDYZVRLIDHEQC
+    github_runner_group: "cmrs-runner-group"
+
+  tasks:
+    - name: Install required packages
+      become: true
+      apt:
+        name:
+          - jq
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - unzip
+          - zip
+          - git
+          - openjdk-17-jdk
+          - maven
+          - mysql-client
+          - ansible-core
+        update_cache: yes
+      register: apt_update_result
+      failed_when: false
+
+    - name: Check if apt update failed
+      become: true
+      debug:
+        msg: "APT update failed, proceeding to change the sources.list."
+      when: apt_update_result.failed
+
+    - name: Backup the current sources.list file
+      become: true
+      copy:
+        src: /etc/apt/sources.list
+        dest: /etc/apt/sources.list.backup
+        backup: yes
+      when: apt_update_result.failed
+
+    - name: Replace 'security.ubuntu.com' with 'archive.ubuntu.com' in sources.list
+      become: true
+      lineinfile:
+        path: /etc/apt/sources.list
+        regexp: '^deb http://security.ubuntu.com/ubuntu/'
+        line: 'deb http://archive.ubuntu.com/ubuntu/'
+        backup: yes
+        state: present
+      when: apt_update_result.failed
+
+    - name: Replace 'security.ubuntu.com' with 'archive.ubuntu.com' in sources.list for security updates
+      become: true
+      lineinfile:
+        path: /etc/apt/sources.list
+        regexp: '^deb http://security.ubuntu.com/ubuntu/'
+        line: 'deb http://archive.ubuntu.com/ubuntu/'
+        backup: yes
+        state: present
+      when: apt_update_result.failed
+
+    - name: Update apt cache after modifying sources.list
+      become: true
+      apt:
+        update_cache: yes
+      when: apt_update_result.failed
+
+    - name: Reinstall required packages after updating sources.list
+      become: true
+      apt:
+        name:
+          - jq
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - unzip
+          - zip
+          - git
+          - openjdk-17-jdk
+          - maven
+          - mysql-client
+          - ansible-core
+        state: present
+      when: apt_update_result.failed
+    
+    - name: Add NodeSource APT repo for Node.js 20
+      become: true
+      apt_key:
+        url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+        state: present
+
+    - name: Add Node.js 20 repo
+      become: true
+      apt_repository:
+        repo: "deb https://deb.nodesource.com/node_20.x {{ ansible_distribution_release }} main"
+        state: present
+        filename: nodesource
+
+    - name: Install Node.js 20 and npm
+      become: true
+      apt:
+        name:
+          - nodejs
+        update_cache: yes
+    
+    - name: Install TypeScript globally
+      become: true
+      npm:
+        name: typescript
+        global: yes
+
+    - name: Verify TypeScript installation
+      become: true
+      command: tsc --version
+      register: tsc_version
+
+    - name: Show TypeScript version
+      debug:
+        msg: "TypeScript version: {{ tsc_version.stdout }}"
+
+    - name: Download AWS CLI zip
+      become: true
+      get_url:
+        url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+        dest: "/tmp/awscliv2.zip"
+
+    - name: Unzip AWS CLI
+      become: true
+      unarchive:
+        src: "/tmp/awscliv2.zip"
+        dest: "/tmp/"
+        remote_src: yes
+
+    - name: Install AWS CLI
+      become: true
+      command: "/tmp/aws/install"
+      args:
+        creates: /usr/local/bin/aws
+
+    - name: Add Docker GPG key
+      become: true
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      become: true
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        update_cache: yes
+
+    - name: Install Docker
+      become: true
+      apt:
+        name: docker-ce
+        update_cache: yes
+
+    - name: Add user to docker group
+      become: true
+      user:
+        name: "{{ docker_user }}"
+        groups: docker
+        append: yes
+
+    - name: Create actions-runner directory
+      become: true
+      file:
+        path: /opt/actions-runner
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Download GitHub runner
+      become: true
+      shell: |
+        mkdir -p /opt/actions-runner && cd /opt/actions-runner
+        curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/download/v2.323.0/actions-runner-linux-x64-2.323.0.tar.gz
+        tar xzf actions-runner.tar.gz
+      args:
+        creates: /opt/actions-runner/actions-runner.tar.gz
+
+    - name: Set ownership of actions-runner directory
+      become: true
+      command: chown -R ubuntu:ubuntu /opt/actions-runner
+
+    - name: Add ubuntu user to docker group
+      become: true
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Check if the GitHub runner service is already running
+      stat:
+        path: /opt/actions-runner/svc.status
+      register: svc_status
+
+
+    - name: Configure GitHub runner
+      become: true
+      become_user: ubuntu
+      command: >
+        ./config.sh
+        --url {{ github_repo }}
+        --token {{ github_token }}
+        --name {{ inventory_hostname }}
+        --labels {{ inventory_hostname }}
+        --runnergroup {{ github_runner_group }}
+        --unattended
+      args:
+        chdir: /opt/actions-runner
+      when:
+        - github_repo is defined
+        - github_token is defined
+        - github_runner_group is defined
+        - svc_status.stat.exists == false
+        - svc_status.stat.size == 0
+
+    - name: Install GitHub Actions runner as a service
+      become: true
+      command: ./svc.sh install
+      args:
+        chdir: /opt/actions-runner
+      when:
+        - svc_status.stat.exists == false
+        - svc_status.stat.size == 0
+
+    - name: Start GitHub Actions runner service
+      become: true
+      command: ./svc.sh start
+      args:
+        chdir: /opt/actions-runner
+
+    # Clear github runner installation file
+    - name: Remove GitHub Actions runner tarball
+      become: true
+      file:
+        path: /opt/actions-runner/actions-runner.tar.gz
+        state: absent
+      ignore_errors: yes
+
+    # Remove AWS CLI installation zip file
+    - name: Remove AWS CLI zip file
+      become: true
+      file:
+        path: /tmp/awscliv2.zip
+        state: absent
+      ignore_errors: yes

@@ -22,3 +22,31 @@ variable "object_ownership" {
   default = "BucketOwnerPreferred"
   type = string
 }
+
+variable "cloudfront_cdn_aliases" {
+  type = list(string)
+}
+
+variable "cloudfront_cert_arn" {
+  type = string
+}
+
+variable "cloudfront_min_protocol" {
+  type = string
+}
+
+variable "cloudfront_ssl_supports" {
+  type = string
+}
+
+variable "cache_policy_id" {
+  type = string
+}
+
+variable "origin_request_policy_id" {
+  type = string
+}
+
+variable "response_headers_policy_id" {
+  type = string
+}
